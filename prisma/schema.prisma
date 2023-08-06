@@ -19,3 +19,4 @@ model Task {
 
   @@index([authorId])
 }
+
