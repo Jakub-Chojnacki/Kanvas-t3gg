@@ -1,5 +1,10 @@
 import { SignIn } from "@clerk/clerk-react";
+import { Box } from "@mantine/core";
 
 export default function SignInPage() {
-  return <SignIn path="/sign-in" routing="path" />;
+  return (
+    <Box>
+      <SignIn />
+    </Box>
+  );
 }
