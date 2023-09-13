@@ -65,13 +65,13 @@ export const tasksRouter = createTRPCRouter({
       const authorId = ctx.userId;
 
       //TODO: Fix adding tasks
-      const newTask = await ctx.prisma.task.create({
-        data: {
-          authorId,
-          content: input.content,
-        },
-      });
+      // const newTask = await ctx.prisma.task.create({
+      //   data: {
+      //     authorId,
+      //     content: input.content,
+      //   },
+      // });
 
-      return newTask;
+      return null;
     }),
 });
