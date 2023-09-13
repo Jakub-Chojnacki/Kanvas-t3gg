@@ -1,5 +1,6 @@
 import { AppContext, AppProps } from "next/app";
 import { useRouter } from "next/router";
+import { Toaster } from "react-hot-toast";
 import { useState } from "react";
 import {
   ClerkProvider,
@@ -16,7 +17,6 @@ import {
 import { dark } from "@clerk/themes";
 
 import BasicLayout from "~/components/BasicLayout";
-
 
 import { api } from "~/utils/api";
 
@@ -60,12 +60,15 @@ const MyApp = ({ Component, pageProps }: AppProps & MantineProps) => {
             baseTheme: colorScheme == "dark" ? dark : null,
           }}
         >
+          <Toaster />
           <SignedIn>
             <Component {...pageProps} />
           </SignedIn>
           <SignedOut>
             {publicPages.includes(pathname) ? (
-             <BasicLayout><Component {...pageProps} /></BasicLayout> 
+              <BasicLayout>
+                <Component {...pageProps} />
+              </BasicLayout>
             ) : (
               <RedirectToSignUp />
             )}

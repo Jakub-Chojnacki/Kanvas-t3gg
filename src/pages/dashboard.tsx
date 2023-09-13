@@ -1,15 +1,8 @@
 import Head from "next/head";
-import { useState } from "react";
-import { AppShell, Navbar, Text, useMantineTheme } from "@mantine/core";
-import { api } from "~/utils/api";
-import SingleTask from "~/components/SingleTask";
-import AppHeader from "~/components/AppHeader";
 
- const Dashboard = () =>{
-  const theme = useMantineTheme();
-  const [opened, setOpened] = useState(false);
-  const { data } = api.tasks.getAll.useQuery();
+import BasicLayout from "~/components/BasicLayout";
 
+const Dashboard = () => {
   return (
     <>
       <Head>
@@ -18,35 +11,11 @@ import AppHeader from "~/components/AppHeader";
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <AppShell
-        styles={{
-          main: {
-            background:
-              theme.colorScheme === "dark"
-                ? theme.colors.dark[6]
-                : theme.colors.gray[0],
-          },
-        }}
-        navbarOffsetBreakpoint="sm"
-        asideOffsetBreakpoint="sm"
-        navbar={
-          <Navbar
-            p="md"
-            hiddenBreakpoint="sm"
-            hidden={!opened}
-            width={{ sm: 200, lg: 300 }}
-          >
-            <Text>Application navbar</Text>
-          </Navbar>
-        }
-        header={<AppHeader />}
-      >
-        {data?.map(({ task, author }) => (
-          <SingleTask key={task.id} task={task} author={author} />
-        ))}
-      </AppShell>
+      <BasicLayout>
+        <div>Dashboard</div>
+      </BasicLayout>
     </>
   );
-}
+};
 
-export default Dashboard
+export default Dashboard;

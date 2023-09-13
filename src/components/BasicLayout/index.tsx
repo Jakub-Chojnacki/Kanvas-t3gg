@@ -1,14 +1,17 @@
-import { Flex, useMantineTheme } from "@mantine/core";
-import React, { ReactNode } from "react";
+import { Flex, useMantineTheme, Navbar, AppShell } from "@mantine/core";
+import React, { ReactNode, useState } from "react";
+
 import AppHeader from "../AppHeader";
 import { headerHeight } from "../AppHeader";
 
 interface IBasicLayoutProps {
   children?: ReactNode;
+  sideNav?: ReactNode;
 }
 
-const BasicLayout = ({ children }: IBasicLayoutProps) => {
+const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
   const theme = useMantineTheme();
+  const [isOpened, setIsOpened] = useState(false);
 
   return (
     <Flex w="100%" mih="100vh" direction="column">
@@ -20,7 +23,35 @@ const BasicLayout = ({ children }: IBasicLayoutProps) => {
         align="center"
         justify="center"
       >
-        {children}
+        <AppShell
+          styles={{
+            main: {
+              background:
+                theme.colorScheme === "dark"
+                  ? theme.colors.dark[6]
+                  : theme.colors.gray[0],
+              minHeight: `calc(100vh - ${headerHeight}px)`,
+            },
+          }}
+          navbarOffsetBreakpoint="sm"
+          asideOffsetBreakpoint="sm"
+          navbar={
+            sideNav ? (
+              <Navbar
+                p="md"
+                hiddenBreakpoint="sm"
+                hidden={!isOpened}
+                width={{ sm: 200, lg: 300 }}
+              >
+                {sideNav}
+              </Navbar>
+            ) : (
+              <React.Fragment></React.Fragment>
+            )
+          }
+        >
+          {children}
+        </AppShell>
       </Flex>
     </Flex>
   );
