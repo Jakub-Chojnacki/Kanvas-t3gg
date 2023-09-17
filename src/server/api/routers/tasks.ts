@@ -2,10 +2,7 @@ import { clerkClient } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/dist/types/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import {
-  createTRPCRouter,
-  privateProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 
 const filterUserData = (user: User) => {
   return {
@@ -59,19 +56,20 @@ export const tasksRouter = createTRPCRouter({
     .input(
       z.object({
         content: z.string().min(1),
+        columnId: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input: { content, columnId } }) => {
       const authorId = ctx.userId;
 
-      //TODO: Fix adding tasks
-      // const newTask = await ctx.prisma.task.create({
-      //   data: {
-      //     authorId,
-      //     content: input.content,
-      //   },
-      // });
+      const newTask = await ctx.prisma.task.create({
+        data: {
+          authorId,
+          content,
+          columnId,
+        },
+      });
 
-      return null;
+      return newTask;
     }),
 });

@@ -62,7 +62,13 @@ const MyApp = ({ Component, pageProps }: AppProps & MantineProps) => {
         >
           <Toaster />
           <SignedIn>
-            <Component {...pageProps} />
+            {publicPages.includes(pathname) ? (
+              <BasicLayout>
+                <Component {...pageProps} />
+              </BasicLayout>
+            ) : (
+              <Component {...pageProps} />
+            )}
           </SignedIn>
           <SignedOut>
             {publicPages.includes(pathname) ? (

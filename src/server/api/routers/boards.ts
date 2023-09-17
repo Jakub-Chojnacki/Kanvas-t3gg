@@ -6,7 +6,15 @@ export const boardsRouter = createTRPCRouter({
     const memberId = ctx.userId;
     const boards = await ctx.prisma.board.findMany({
       take: 10,
-      where: { members: memberId },
+      where: {
+        members: {
+          some: {
+            userId: {
+              equals: memberId,
+            },
+          },
+        },
+      },
     });
 
     return boards;
@@ -19,5 +27,29 @@ export const boardsRouter = createTRPCRouter({
       });
 
       return boards;
+    }),
+  create: privateProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input: { name } }) => {
+      const authorId = ctx.userId;
+
+      const newBoard = await ctx.prisma.board.create({
+        data: {
+          name,
+        },
+      });
+
+      await ctx.prisma.boardMember.create({
+        data: {
+          userId: authorId,
+          boardId: newBoard.id,
+        },
+      });
+
+      return newBoard;
     }),
 });

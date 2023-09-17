@@ -17,7 +17,7 @@ const BoardPage: NextPage<{ id: string }> = ({ id }) => {
   return (
     <>
       <Head>
-        <title>{`${data.id}`}</title>
+        <title>{`${data.name}`}</title>
       </Head>
       <BasicLayout sideNav={boardSidenav}>
         <KanbanBoard boardData={data} />

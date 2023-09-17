@@ -8,12 +8,52 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Task {
+model Board {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-  content   String
-  authorId  String
-  assignedTo String? //TODO: figure out a way to make it a String[]
+  name      String
+
+  columns Column[]
+  members BoardMember[]
+}
+
+model AssignedToTask {
+  id     String @id @default(cuid())
+  userId String @unique
+  Task   Task   @relation(fields: [taskId], references: [id])
+  taskId String
+  assignedAt DateTime @default(now())
+
+  @@index([taskId])
+}
+model BoardMember {
+  id      String @id @default(cuid())
+  userId  String 
+  Board   Board  @relation(fields: [boardId], references: [id])
+  boardId String
+
+  @@index([boardId])
+}
+
+model Column {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  name      String
+
+  Board   Board  @relation(fields: [boardId], references: [id])
+  boardId String
+
+  tasks Task[]
+
+  @@index([boardId])
+}
+
+model Task {
+  id         String           @id @default(cuid())
+  createdAt  DateTime         @default(now())
+  content    String
+  authorId   String
+  assignedTo AssignedToTask[]
 
   Column   Column @relation(fields: [columnId], references: [id])
   columnId String
@@ -23,38 +63,15 @@ model Task {
   @@index([columnId])
 }
 
-model Column {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  name      String
-  
-  Board Board @relation(fields:[boardId],references:[id])
-  boardId String
-
-  tasks Task[]
-
-  @@index([boardId])
-}
-
 model Comment {
   id        String    @id @default(cuid())
   authorId  String
   createdAt DateTime  @default(now())
   editedAt  DateTime?
-  content String
+  content   String
 
   Task   Task   @relation(fields: [taskId], references: [id])
   taskId String
 
   @@index([taskId])
-}
-
-model Board {
-  id      String   @id @default(cuid())
-  createdAt DateTime  @default(now())
-  name String
-  
-  columns Column[]
-  members String //TODO: find a way to store scalar[]
-
 }

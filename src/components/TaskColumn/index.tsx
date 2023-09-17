@@ -24,7 +24,7 @@ const TaskColumn = ({ column }: SingleTaskColumn) => {
   const { mutate } = api.tasks.create.useMutation({
     onSuccess: async () => {
       setInput("");
-      await ctx.tasks.getAll.invalidate();
+      await ctx.tasks.getTasksByColumn.invalidate();
     },
     onError: (e) => {
       toast.error(`${JSON.parse(e.message)[0].message}`);
@@ -43,7 +43,9 @@ const TaskColumn = ({ column }: SingleTaskColumn) => {
     >
       {draggableMarkup}
       <div className="mt-auto">
-        <button onClick={() => mutate({ content: input })}>Add a task</button>
+        <button onClick={() => mutate({ content: input, columnId })}>
+          Add a task
+        </button>
         <input
           value={input}
           type="text"
