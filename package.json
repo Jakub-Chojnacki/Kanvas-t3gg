@@ -9,11 +9,15 @@
     "lint": "next lint",
     "start": "next start"
   },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed/seed.ts"
+  },
   "dependencies": {
     "@clerk/nextjs": "^4.23.1",
     "@clerk/themes": "^1.7.5",
     "@dnd-kit/core": "^6.0.8",
     "@dnd-kit/sortable": "^7.0.2",
+    "@dnd-kit/utilities": "^3.2.1",
     "@emotion/react": "^11.11.1",
     "@mantine/core": "^6.0.17",
     "@mantine/dates": "^6.0.17",

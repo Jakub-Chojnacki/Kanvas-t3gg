@@ -22,13 +22,41 @@ export const columnsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input: { name, boardId } }) => {
+      const order = await ctx.prisma.column.count();
       const newColumn = await ctx.prisma.column.create({
         data: {
           name,
           boardId,
+          order,
         },
       });
 
       return newColumn;
     }),
+  reorderColumns: privateProcedure
+    .input(
+      z.object({
+        activeId: z.string().min(1),
+        overId: z.string().min(1),
+        activeOrder: z.number(),
+        overOrder: z.number(),
+      })
+    )
+    .mutation(
+      async ({ ctx, input: { activeId, overId, activeOrder, overOrder } }) => {
+        await ctx.prisma.column.update({
+          where: { id: activeId },
+          data: {
+            order: overOrder,
+          },
+        });
+
+        await ctx.prisma.column.update({
+          where: { id: overId },
+          data: {
+            order: activeOrder,
+          },
+        });
+      }
+    ),
 });

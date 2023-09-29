@@ -14,7 +14,7 @@ const BoardList = () => {
         </HoverCard.Target>
         <HoverCard.Dropdown>
           {data?.map((board) => {
-            return <Link href={`/board/${board.id}`}>{board.id}</Link>;
+            return <Link key={board.id} href={`/board/${board.id}`}>{board.id}</Link>;
           })}
         </HoverCard.Dropdown>
       </HoverCard>

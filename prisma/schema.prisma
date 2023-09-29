@@ -15,20 +15,22 @@ model Board {
 
   columns Column[]
   members BoardMember[]
+  Task    Task[]
 }
 
 model AssignedToTask {
-  id     String @id @default(cuid())
-  userId String @unique
-  Task   Task   @relation(fields: [taskId], references: [id])
-  taskId String
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  Task       Task     @relation(fields: [taskId], references: [id])
+  taskId     String
   assignedAt DateTime @default(now())
 
   @@index([taskId])
 }
+
 model BoardMember {
   id      String @id @default(cuid())
-  userId  String 
+  userId  String
   Board   Board  @relation(fields: [boardId], references: [id])
   boardId String
 
@@ -42,6 +44,7 @@ model Column {
 
   Board   Board  @relation(fields: [boardId], references: [id])
   boardId String
+  order   Int
 
   tasks Task[]
 
@@ -54,13 +57,18 @@ model Task {
   content    String
   authorId   String
   assignedTo AssignedToTask[]
+  order      Int
 
   Column   Column @relation(fields: [columnId], references: [id])
   columnId String
 
+  Board   Board  @relation(fields: [boardId], references: [id])
+  boardId String
+
   Comments Comment[]
 
   @@index([columnId])
+  @@index([boardId])
 }
 
 model Comment {

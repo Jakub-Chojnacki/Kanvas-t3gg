@@ -41,6 +41,17 @@ export const tasksRouter = createTRPCRouter({
 
       return tasks;
     }),
+  getTasksByBoard: privateProcedure
+    .input(z.object({ boardId: z.string() }))
+    .query(async ({ ctx, input: { boardId } }) => {
+      const tasks = await ctx.prisma.task.findMany({
+        where: { boardId },
+      });
+
+      if (!tasks) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return tasks;
+    }),
   getById: privateProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -57,19 +68,59 @@ export const tasksRouter = createTRPCRouter({
       z.object({
         content: z.string().min(1),
         columnId: z.string(),
+        boardId:z.string()
       })
     )
-    .mutation(async ({ ctx, input: { content, columnId } }) => {
+    .mutation(async ({ ctx, input: { content, columnId, boardId } }) => {
       const authorId = ctx.userId;
-
+      const order = await ctx.prisma.task.count();
       const newTask = await ctx.prisma.task.create({
         data: {
           authorId,
           content,
           columnId,
+          order,
+          boardId
         },
       });
 
       return newTask;
     }),
+  reorderTasks: privateProcedure
+    .input(
+      z.object({
+        activeId: z.string().min(1),
+        overId: z.string().min(1),
+        activeOrder: z.number(),
+        overOrder: z.number(),
+        activeChangedColumn: z.string().optional(),
+      })
+    )
+    .mutation(
+      async ({
+        ctx,
+        input: {
+          activeId,
+          overId,
+          activeOrder,
+          overOrder,
+          activeChangedColumn,
+        },
+      }) => {
+        await ctx.prisma.task.update({
+          where: { id: activeId },
+          data: {
+            order: overOrder,
+            columnId: activeChangedColumn,
+          },
+        });
+
+        await ctx.prisma.task.update({
+          where: { id: overId },
+          data: {
+            order: activeOrder,
+          },
+        });
+      }
+    ),
 });
