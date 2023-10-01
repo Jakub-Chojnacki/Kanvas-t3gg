@@ -1,56 +1,46 @@
-import React, { useMemo, useState, useEffect } from "react";
-import TaskColumn from "./components/TaskColumn";
+import React, { useState, useEffect } from "react";
 import {
-  Active,
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  DragOverlay,
-  DragStartEvent,
-  Over,
-  PointerSensor,
-  closestCenter,
-  closestCorners,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-import { RouterOutputs, api } from "~/utils/api";
+  DragDropContext,
+  DraggableLocation,
+  DropResult,
+  Droppable,
+} from "@hello-pangea/dnd";
 import { Column, Task } from "@prisma/client";
-import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
-import getDndOrder from "~/utils/getDndOrder";
-import reorderDndArray from "~/utils/reorderDndArray";
-import SingleTask from "./components/SingleTask";
-import { SORTABLE_TYPE } from "./const";
-import TaskCard from "./components/TaskCard";
+
+import { RouterOutputs, api } from "~/utils/api";
+import { compareOrder } from "./utils";
+
+import TaskColumn from "./components/TaskColumn";
+
+import { DROPPABLE_TYPE } from "./const";
 
 type BoardData = NonNullable<RouterOutputs["boards"]["getById"]>;
+
+type ReorderSourceDestination = {
+  source: DraggableLocation;
+  destination: DraggableLocation;
+};
 
 const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   const ctx = api.useContext();
 
   const [columnsData, setColumnsData] = useState<Column[]>([]);
   const [tasksData, setTasksData] = useState<Task[]>([]);
-  const [activeColumn, setActiveColumn] = useState<Column | null>(null);
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const { data: columns } = api.columns.getById.useQuery({ id: boardData.id });
   const { data: tasks } = api.tasks.getTasksByBoard.useQuery({
     boardId: boardData.id,
   });
 
-  const columnsId = useMemo(
-    () => columns?.map((col) => col.id) || [],
-    [columns]
-  );
-
   useEffect(() => {
-    if (columns?.length && !columnsData.length) setColumnsData(columns);
+    if (columns?.length && !columnsData.length)
+      setColumnsData(columns.toSorted(compareOrder));
   }, [columns]);
 
   useEffect(() => {
-    if (tasks?.length && !tasksData.length) setTasksData(tasks);
+    if (tasks?.length && !tasksData.length)
+      setTasksData(tasks.toSorted(compareOrder));
   }, [tasks]);
 
   const { mutate: reorderColumns } = api.columns.reorderColumns.useMutation({
@@ -71,195 +61,148 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
     },
   });
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
-    })
-  );
+  const onDragEnd = (result: DropResult) => {
+    const { destination, source, type } = result;
 
-  const resetActiveElements = (): void => {
-    setActiveColumn(null);
-    setActiveTask(null);
-  };
+    if (!destination) return;
 
-  const onDragStart = (event: DragStartEvent) => {
-    const {
-      active: {
-        data: { current },
-      },
-    } = event;
-
-    if (current && current.type === SORTABLE_TYPE.COLUMN) {
-      setActiveColumn(current.column as Column);
+    if (type === DROPPABLE_TYPE.COLUMN) {
+      console.log(source, destination);
+      handleReorderColumn({ source, destination });
+      return;
     }
 
-    if (current && current.type === SORTABLE_TYPE.TASK) {
-      setActiveTask(current.task as Task);
+    if (type === DROPPABLE_TYPE.TASK) {
+      const isSameColumn = destination.droppableId === source.droppableId;
+
+      if (isSameColumn && destination.index === source.index) return;
+
+      if (!isSameColumn) handleChangeTaskColumn({ source, destination });
+
+      if (isSameColumn) handleReorderTask({ source, destination });
+
+      return;
     }
   };
 
-  const handleReorderColumn = (
-    active: Active,
-    over: Over,
-    activeId: string,
-    overId: string
-  ): void => {
-    const { activeOrder, overOrder } = getDndOrder(
-      active,
-      over,
-      SORTABLE_TYPE.COLUMN
-    );
+  const handleReorderColumn = ({
+    source,
+    destination,
+  }: ReorderSourceDestination): void => {
+    const copiedColumns = [...columnsData];
+    const [movedColumn] = copiedColumns.splice(source.index, 1);
 
-    const reorderedColumns = reorderDndArray({
-      data: columnsData,
-      activeId,
-      overId,
-      activeOrder,
-      overOrder,
-    });
+    if (!movedColumn) return;
+    copiedColumns.splice(destination.index, 0, movedColumn);
+    const reorderedColumns = copiedColumns.map((column, index) => ({
+      ...column,
+      order: index,
+    }));
 
     setColumnsData(reorderedColumns);
-
-    return reorderColumns({
-      activeId,
-      overId,
-      activeOrder,
-      overOrder,
-    });
+    reorderColumns({ reorderedColumns });
   };
 
-  const handleChangeTaskColumn = (
-    tasks: Task[],
-    taskId: string,
-    columnId: string,
-    order: number
-  ): Task[] => {
-    const mappedTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, columnId, order } : task
+  const handleChangeTaskColumn = ({
+    source,
+    destination,
+  }: ReorderSourceDestination) => {
+    const sourceColumnTasks = tasksData.filter(
+      (task) => task.columnId === source.droppableId
     );
 
-    return mappedTasks;
+    const destinationColumnTasks = tasksData.filter(
+      (task) => task.columnId === destination.droppableId
+    );
+
+    const sourceTask = sourceColumnTasks[source.index];
+    if (!sourceTask) return;
+
+    const updatedSourceTask = {
+      ...sourceTask,
+      columnId: destination.droppableId,
+    };
+
+    sourceColumnTasks.splice(source.index, 1);
+    destinationColumnTasks.splice(destination.index, 0, updatedSourceTask);
+
+    const destinationNewOrder = destinationColumnTasks.map((task, index) => ({
+      ...task,
+      order: index,
+    }));
+
+    const reorderedTasks = [
+      ...tasksData.filter(
+        (task) =>
+          task.columnId !== destination.droppableId &&
+          task.columnId !== source.droppableId
+      ),
+      ...destinationNewOrder,
+      ...sourceColumnTasks,
+    ];
+
+    setTasksData(reorderedTasks);
+    reorderTasks({ reorderedTasks });
   };
 
-  console.log(tasksData.map((task) => task.order));
+  const handleReorderTask = ({
+    source,
+    destination,
+  }: ReorderSourceDestination) => {
+    const destinationColumnTasks = tasksData.filter(
+      (task) => task.columnId === destination.droppableId
+    );
 
-  const handleReorderTask = (
-    active: Active,
-    over: Over,
-    activeId: string,
-    overId: string
-  ): void => {
-    const isOverColumn = over.data.current?.type === SORTABLE_TYPE.COLUMN;
-    const activeTask: Task = active?.data?.current?.task;
+    console.log(destinationColumnTasks.map((task) => task.order));
 
-    if (isOverColumn) {
-      const columnLength = tasksData.filter(
-        (task) => task.columnId === overId
-      ).length;
-      const mappedTasks = handleChangeTaskColumn(
-        tasksData,
-        activeId,
-        overId,
-        columnLength
-      );
+    const [movedTask] = destinationColumnTasks.splice(source.index, 1);
+    if (!movedTask) return;
+    destinationColumnTasks.splice(destination.index, 0, movedTask);
 
-      const changedOrderTasks = mappedTasks.map((task) => {
-        if (
-          task.columnId === activeTask.columnId &&
-          task.order > activeTask.order
-        ) {
-          return { ...task, order: task.order - 1 };
-        }
-        return task;
-      });
+    // Update the "order" property of each column based on the new order
+    const updatedTasks = destinationColumnTasks.map((task, index) => ({
+      ...task,
+      order: index,
+    }));
 
-      setTasksData(changedOrderTasks);
-    }
-    const isActiveATask = active.data.current?.type === "Task";
-    const isOverATask = over.data.current?.type === "Task";
+    const reorderedTasks = [
+      ...tasksData.filter((task) => task.columnId !== destination.droppableId),
+      ...updatedTasks,
+    ];
 
-    if (isActiveATask && isOverATask) {
-      setTasksData((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId);
-        const overIndex = tasks.findIndex((t) => t.id === overId);
-
-        if (tasks[activeIndex]!.columnId != tasks[overIndex]!.columnId) {
-          tasks[activeIndex]!.columnId = tasks[overIndex]!.columnId;
-          return arrayMove(tasks, activeIndex, overIndex - 1);
-        }
-
-        return arrayMove(tasks, activeIndex, overIndex);
-      });
-    }
+    setTasksData(reorderedTasks);
+    reorderTasks({ reorderedTasks });
   };
-
-  const onDragEnd = ({ active, over }: DragEndEvent): void => {
-    resetActiveElements();
-    if (!over) return;
-    const activeId = active.id as string;
-    const overId = over.id as string;
-    if (!activeColumn) return;
-    if (activeId === overId) return;
-    if (activeColumn) handleReorderColumn(active, over, activeId, overId);
-    // if (activeTask) handleReorderTask(active, over, activeId, overId);
-  };
-
-  const onDragOver = ({ active, over }: DragOverEvent) => {
-    if (!over || !active) return;
-    const activeId = active.id as string;
-    const overId = over.id as string;
-    if (activeId === overId) return;
-    const isActiveTask = active.data.current?.type === SORTABLE_TYPE.TASK;
-    if (isActiveTask) handleReorderTask(active, over, activeId, overId);
-  };
-
-  const compareOrder = (a: Column, b: Column) => {
-    return a.order - b.order;
-  };
-
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-      collisionDetection={closestCorners}
-    >
-      <div className="flex flex-1 flex-row gap-2">
-        <SortableContext items={columnsId}>
-          {columnsData?.sort(compareOrder)?.map((column) => (
-            <TaskColumn
-              key={column.id}
-              column={column}
-              tasks={tasksData.filter((task) => task.columnId === column.id)}
-            />
-          ))}
-        </SortableContext>
-        {createPortal(
-          <DragOverlay>
-            {activeColumn && (
-              <TaskColumn
-                column={activeColumn}
-                tasks={tasksData.filter(
-                  (task) => task.columnId === activeColumn.id
-                )}
-              />
-            )}
-            {activeTask && <SingleTask task={activeTask} />}
-            {/* {activeTask && (
-              <TaskCard
-                task={activeTask}
-                deleteTask={() => null}
-                updateTask={() => null}
-              />
-            )} */}
-          </DragOverlay>,
-          document.body
-        )}
-      </div>
-    </DndContext>
+    <div className="flex flex-1 flex-row gap-2">
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable
+          droppableId="all-columns"
+          direction="horizontal"
+          type={DROPPABLE_TYPE.COLUMN}
+        >
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="flex flex-grow flex-row gap-4"
+            >
+              {columnsData?.sort(compareOrder)?.map((column, index) => (
+                <TaskColumn
+                  key={column.id}
+                  column={column}
+                  index={index}
+                  tasks={tasksData.filter(
+                    (task) => task.columnId === column.id
+                  )}
+                />
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
   );
 };
 

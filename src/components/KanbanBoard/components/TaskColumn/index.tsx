@@ -1,48 +1,25 @@
-import { useDroppable } from "@dnd-kit/core";
-import React, { useMemo, useState } from "react";
-import toast from "react-hot-toast";
-import { api } from "~/utils/api";
-
-import type { RouterOutputs } from "~/utils/api";
-import { SortableContext, useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import SingleTask from "../SingleTask";
-import { SORTABLE_TYPE } from "../../const";
+import React, { useState } from "react";
 import { Task } from "@prisma/client";
-import TaskCard from "../TaskCard";
+import toast from "react-hot-toast";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
+
+import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { compareOrder } from "../../utils";
+
+import SingleTask from "../SingleTask";
+
+import { DROPPABLE_TYPE } from "../../const";
 
 type SingleTaskColumn = {
   column: RouterOutputs["columns"]["getById"][number];
-  tasks: Task[]
+  tasks: Task[];
+  index: number;
 };
 
-const TaskColumn = ({ column, tasks }: SingleTaskColumn) => {
+const TaskColumn = ({ column, tasks, index }: SingleTaskColumn) => {
   const { id: columnId } = column;
-  // const { data } = api.tasks.getTasksByColumn.useQuery({ columnId });
   const [input, setInput] = useState("");
-  const tasksIds = useMemo(() => {
-    return tasks?.map((task) => task.id);
-  }, [tasks]);
-
-  const {
-    setNodeRef,
-    attributes,
-    listeners,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: columnId,
-    data: {
-      type: SORTABLE_TYPE.COLUMN,
-      column,
-    },
-  });
-
-  const style = {
-    transition,
-    transform: CSS.Transform.toString(transform),
-  };
 
   const ctx = api.useContext();
   const { mutate } = api.tasks.create.useMutation({
@@ -55,54 +32,41 @@ const TaskColumn = ({ column, tasks }: SingleTaskColumn) => {
     },
   });
 
-  if (isDragging) {
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="flex h-[500px] w-[350px] flex-col rounded border-2 border-solid border-rose-500 p-4 opacity-60"
-      ></div>
-    );
-  }
-
-  const compareOrder = (a: Task, b: Task) => {
-    return a.order - b.order;
-  };
-
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex h-[500px] w-[350px] flex-col rounded border-2 border-solid border-gray-400 p-4 overflow-y-auto"
-    >
-      <div {...attributes} {...listeners}>
-        {column.name}
-      </div>
-      <SortableContext items={tasksIds}>
-        {tasks?.sort(compareOrder)?.map((task) => (
-          <SingleTask key={task.id} task={task} />
-        ))}
-        {/* {tasks?.sort(compareOrder)?.map((task) => (
-          <TaskCard key={task.id} task={task} deleteTask={()=>null} updateTask={()=>null} />
-        ))} */}
-
-
-      </SortableContext>
-      <div className="mt-auto">
-        <button
-          onClick={() =>
-            mutate({ content: input, columnId, boardId: column.boardId })
-          }
+    <Draggable draggableId={columnId} index={index}>
+      {({ innerRef, dragHandleProps, draggableProps }) => (
+        <div
+          ref={innerRef}
+          {...draggableProps}
+          className="flex h-[500px] w-[350px] flex-col overflow-y-auto rounded border-2 border-solid border-gray-400 p-4"
         >
-          Add a task
-        </button>
-        <input
-          value={input}
-          type="text"
-          onChange={(e) => setInput(e.target.value)}
-        />
-      </div>
-    </div>
+          <div {...dragHandleProps}>{column.name}</div>
+          <Droppable droppableId={columnId} type={DROPPABLE_TYPE.TASK}>
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {tasks?.sort(compareOrder)?.map((task, index) => (
+                  <SingleTask key={task.id} task={task} index={index} />
+                ))}
+              </div>
+            )}
+          </Droppable>
+          <div className="mt-auto">
+            <button
+              onClick={() =>
+                mutate({ content: input, columnId, boardId: column.boardId })
+              }
+            >
+              Add a task
+            </button>
+            <input
+              value={input}
+              type="text"
+              onChange={(e) => setInput(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+    </Draggable>
   );
 };
 

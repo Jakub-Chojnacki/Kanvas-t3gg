@@ -36,27 +36,26 @@ export const columnsRouter = createTRPCRouter({
   reorderColumns: privateProcedure
     .input(
       z.object({
-        activeId: z.string().min(1),
-        overId: z.string().min(1),
-        activeOrder: z.number(),
-        overOrder: z.number(),
+        reorderedColumns: z.any(),
       })
     )
-    .mutation(
-      async ({ ctx, input: { activeId, overId, activeOrder, overOrder } }) => {
-        await ctx.prisma.column.update({
-          where: { id: activeId },
-          data: {
-            order: overOrder,
-          },
-        });
+    .mutation(async ({ ctx, input: { reorderedColumns } }) => {
+      try {
+        for (let i = 0; i < reorderedColumns.length; i++) {
+          const column = reorderedColumns[i];
+          const { id, order } = column;
 
-        await ctx.prisma.column.update({
-          where: { id: overId },
-          data: {
-            order: activeOrder,
-          },
-        });
+          await ctx.prisma.column.update({
+            where: {
+              id: id,
+            },
+            data: {
+              order: order,
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Error updating column order:", error);
       }
-    ),
+    }),
 });

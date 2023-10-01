@@ -68,7 +68,7 @@ export const tasksRouter = createTRPCRouter({
       z.object({
         content: z.string().min(1),
         columnId: z.string(),
-        boardId:z.string()
+        boardId: z.string(),
       })
     )
     .mutation(async ({ ctx, input: { content, columnId, boardId } }) => {
@@ -80,7 +80,7 @@ export const tasksRouter = createTRPCRouter({
           content,
           columnId,
           order,
-          boardId
+          boardId,
         },
       });
 
@@ -89,38 +89,33 @@ export const tasksRouter = createTRPCRouter({
   reorderTasks: privateProcedure
     .input(
       z.object({
-        activeId: z.string().min(1),
-        overId: z.string().min(1),
-        activeOrder: z.number(),
-        overOrder: z.number(),
-        activeChangedColumn: z.string().optional(),
+        reorderedTasks: z.any(),
+        initialColumn: z.any(),
       })
     )
-    .mutation(
-      async ({
-        ctx,
-        input: {
-          activeId,
-          overId,
-          activeOrder,
-          overOrder,
-          activeChangedColumn,
-        },
-      }) => {
-        await ctx.prisma.task.update({
-          where: { id: activeId },
-          data: {
-            order: overOrder,
-            columnId: activeChangedColumn,
-          },
-        });
+    .mutation(async ({ ctx, input: { reorderedTasks } }) => {
+      try {
+        // Loop through the reordered columns and update their "order" property in the database
+        for (let i = 0; i < reorderedTasks.length; i++) {
+          const task = reorderedTasks[i];
+          const { id, order, columnId } = task;
 
-        await ctx.prisma.task.update({
-          where: { id: overId },
-          data: {
-            order: activeOrder,
-          },
-        });
+          await ctx.prisma.task.update({
+            where: {
+              id: id,
+            },
+            data: {
+              order: order,
+              columnId,
+            },
+          });
+        }
+
+
+
+        console.log("Column order updated successfully.");
+      } catch (error) {
+        console.error("Error updating column order:", error);
       }
-    ),
+    }),
 });

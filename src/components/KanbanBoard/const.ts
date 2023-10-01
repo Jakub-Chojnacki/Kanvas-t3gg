@@ -1,4 +1,4 @@
-export const SORTABLE_TYPE = {
+export const DROPPABLE_TYPE = {
   COLUMN: "Column",
   TASK: "Task",
 };
