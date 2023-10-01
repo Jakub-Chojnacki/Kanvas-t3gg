@@ -12,7 +12,7 @@ import SingleTask from "../SingleTask";
 import { DROPPABLE_TYPE } from "../../const";
 
 type SingleTaskColumn = {
-  column: RouterOutputs["columns"]["getById"][number];
+  column: RouterOutputs["columns"]["getColumnsByBoardId"][number];
   tasks: Task[];
   index: number;
 };

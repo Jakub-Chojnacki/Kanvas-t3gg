@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 
 export const columnsRouter = createTRPCRouter({
-  getById: privateProcedure
+  getColumnsByBoardId: privateProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const column = await ctx.prisma.column.findMany({

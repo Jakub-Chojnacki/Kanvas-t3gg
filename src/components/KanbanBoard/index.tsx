@@ -28,7 +28,9 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   const [columnsData, setColumnsData] = useState<Column[]>([]);
   const [tasksData, setTasksData] = useState<Task[]>([]);
 
-  const { data: columns } = api.columns.getById.useQuery({ id: boardData.id });
+  const { data: columns } = api.columns.getColumnsByBoardId.useQuery({
+    id: boardData.id,
+  });
   const { data: tasks } = api.tasks.getTasksByBoard.useQuery({
     boardId: boardData.id,
   });
@@ -45,7 +47,7 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
 
   const { mutate: reorderColumns } = api.columns.reorderColumns.useMutation({
     onSuccess: async () => {
-      await ctx.columns.getById.invalidate({ id: boardData.id });
+      await ctx.columns.getColumnsByBoardId.invalidate({ id: boardData.id });
     },
     onError: (e) => {
       toast.error(`${JSON.parse(e.message)[0].message}`);
@@ -54,20 +56,19 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
 
   const { mutate: reorderTasks } = api.tasks.reorderTasks.useMutation({
     onSuccess: async () => {
-      await ctx.columns.getById.invalidate({ id: boardData.id });
+      await ctx.columns.getColumnsByBoardId.invalidate({ id: boardData.id });
     },
     onError: (e) => {
       toast.error(`${JSON.parse(e.message)[0].message}`);
     },
   });
 
-  const onDragEnd = (result: DropResult) => {
+  const onDragEnd = (result: DropResult): void => {
     const { destination, source, type } = result;
 
     if (!destination) return;
 
     if (type === DROPPABLE_TYPE.COLUMN) {
-      console.log(source, destination);
       handleReorderColumn({ source, destination });
       return;
     }
@@ -106,7 +107,7 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   const handleChangeTaskColumn = ({
     source,
     destination,
-  }: ReorderSourceDestination) => {
+  }: ReorderSourceDestination): void => {
     const sourceColumnTasks = tasksData.filter(
       (task) => task.columnId === source.droppableId
     );
@@ -148,12 +149,10 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   const handleReorderTask = ({
     source,
     destination,
-  }: ReorderSourceDestination) => {
+  }: ReorderSourceDestination): void => {
     const destinationColumnTasks = tasksData.filter(
       (task) => task.columnId === destination.droppableId
     );
-
-    console.log(destinationColumnTasks.map((task) => task.order));
 
     const [movedTask] = destinationColumnTasks.splice(source.index, 1);
     if (!movedTask) return;
