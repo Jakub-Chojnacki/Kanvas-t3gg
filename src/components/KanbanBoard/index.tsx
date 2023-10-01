@@ -36,13 +36,19 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   });
 
   useEffect(() => {
-    if (columns?.length && !columnsData.length)
-      setColumnsData(columns.toSorted(compareOrder));
+    if (columns?.length && !columnsData.length) {
+      const clonedColumns = [...columns];
+      clonedColumns.sort(compareOrder);
+      setColumnsData(clonedColumns);
+    }
   }, [columns]);
 
   useEffect(() => {
-    if (tasks?.length && !tasksData.length)
-      setTasksData(tasks.toSorted(compareOrder));
+    if (tasks?.length && !tasksData.length) {
+      const clonedTasks = [...tasks];
+      clonedTasks.sort(compareOrder);
+      setTasksData(tasks);
+    }
   }, [tasks]);
 
   const { mutate: reorderColumns } = api.columns.reorderColumns.useMutation({
