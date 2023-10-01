@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import {
@@ -10,10 +11,11 @@ import {
 } from "@mantine/core";
 
 import SignInButton from "../SignInButton";
-import SignUpButton from "../SignUpButton"
+import SignUpButton from "../SignUpButton";
 import ColorSchemeToggle from "../ColorSchemeToggle";
+import BoardList from "../BoardList";
 
-export const headerHeight = 70 ;
+export const headerHeight = 70;
 
 const AppHeader = () => {
   const theme = useMantineTheme();
@@ -39,7 +41,17 @@ const AppHeader = () => {
           direction="row"
           w="100%"
         >
-          <Text size={"xl"}>Kanvas</Text>
+          <SignedOut>
+            <Link href="/">
+              <Text size={"xl"}>Kanvas</Text>
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <Link href="/dashboard">
+              <Text size={"xl"}>Kanvas</Text>
+            </Link>
+            <BoardList />
+          </SignedIn>
           <Flex gap="sm" align="center">
             <ColorSchemeToggle />
             <SignedIn>
@@ -47,7 +59,7 @@ const AppHeader = () => {
             </SignedIn>
             <SignedOut>
               <SignInButton />
-              <SignUpButton/>
+              <SignUpButton />
             </SignedOut>
           </Flex>
         </Flex>

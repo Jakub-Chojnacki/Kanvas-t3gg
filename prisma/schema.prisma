@@ -1,22 +1,85 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider     = "mysql"
   url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
-generator client {
-  provider = "prisma-client-js"
+model Board {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  name      String
+
+  columns Column[]
+  members BoardMember[]
+  Task    Task[]
+}
+
+model AssignedToTask {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  Task       Task     @relation(fields: [taskId], references: [id])
+  taskId     String
+  assignedAt DateTime @default(now())
+
+  @@index([taskId])
+}
+
+model BoardMember {
+  id      String @id @default(cuid())
+  userId  String
+  Board   Board  @relation(fields: [boardId], references: [id])
+  boardId String
+
+  @@index([boardId])
+}
+
+model Column {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  name      String
+
+  Board   Board  @relation(fields: [boardId], references: [id])
+  boardId String
+  order   Int
+
+  tasks Task[]
+
+  @@index([boardId])
 }
 
 model Task {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+  id         String           @id @default(cuid())
+  createdAt  DateTime         @default(now())
+  content    String
+  authorId   String
+  assignedTo AssignedToTask[]
+  order      Int
 
-  content  String
-  authorId String
+  Column   Column @relation(fields: [columnId], references: [id])
+  columnId String
 
-  @@index([authorId])
+  Board   Board  @relation(fields: [boardId], references: [id])
+  boardId String
+
+  Comments Comment[]
+
+  @@index([columnId])
+  @@index([boardId])
 }
 
+model Comment {
+  id        String    @id @default(cuid())
+  authorId  String
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+  content   String
+
+  Task   Task   @relation(fields: [taskId], references: [id])
+  taskId String
+
+  @@index([taskId])
+}

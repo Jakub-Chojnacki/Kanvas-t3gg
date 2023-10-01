@@ -9,10 +9,14 @@
     "lint": "next lint",
     "start": "next start"
   },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed/seed.ts"
+  },
   "dependencies": {
     "@clerk/nextjs": "^4.23.1",
     "@clerk/themes": "^1.7.5",
     "@emotion/react": "^11.11.1",
+    "@hello-pangea/dnd": "^16.3.0",
     "@mantine/core": "^6.0.17",
     "@mantine/dates": "^6.0.17",
     "@mantine/dropzone": "^6.0.17",
@@ -21,7 +25,7 @@
     "@mantine/next": "^6.0.17",
     "@mantine/notifications": "^6.0.17",
     "@mantine/tiptap": "^6.0.17",
-    "@prisma/client": "^5.0.0",
+    "@prisma/client": "^5.2.0",
     "@t3-oss/env-nextjs": "^0.3.1",
     "@tabler/icons": "^2.30.0",
     "@tabler/icons-react": "^2.30.0",
@@ -33,11 +37,13 @@
     "@trpc/next": "^10.26.0",
     "@trpc/react-query": "^10.26.0",
     "@trpc/server": "^10.26.0",
+    "@types/react-beautiful-dnd": "^13.1.5",
     "cookies-next": "^2.1.2",
     "dayjs": "^1.11.9",
     "next": "^13.4.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hot-toast": "^2.4.1",
     "superjson": "1.12.2",
     "zod": "^3.21.4"
   },
