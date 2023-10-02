@@ -5,7 +5,7 @@ import { Button } from "@mantine/core";
 const SignUpButton = () => {
   return (
     <ClerkSignUpButton>
-      <Button>Sign up</Button>
+      <Button className="bg-logoPurple-100 hover:bg-logoPurple-200 ">Sign up</Button>
     </ClerkSignUpButton>
   );
 };
