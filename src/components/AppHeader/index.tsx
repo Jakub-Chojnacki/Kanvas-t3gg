@@ -1,14 +1,15 @@
 import Link from "next/link";
+import NextImage from "next/image";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import {
   Burger,
   Header,
   MediaQuery,
-  Text,
   useMantineTheme,
   Flex,
 } from "@mantine/core";
+import image from "./logo.svg";
 
 import SignInButton from "../SignInButton";
 import SignUpButton from "../SignUpButton";
@@ -43,12 +44,12 @@ const AppHeader = () => {
         >
           <SignedOut>
             <Link href="/">
-              <Text size={"xl"}>Kanvas</Text>
+              <NextImage alt="img" src={image} width={120} height={40} />
             </Link>
           </SignedOut>
           <SignedIn>
             <Link href="/dashboard">
-              <Text size={"xl"}>Kanvas</Text>
+              <NextImage alt="img" src={image} width={120} height={40} />
             </Link>
             <BoardList />
           </SignedIn>

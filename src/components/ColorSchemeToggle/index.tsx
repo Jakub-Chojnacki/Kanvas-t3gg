@@ -12,7 +12,7 @@ const ColorSchemeToggle = () => {
         sx={(theme) => ({
           backgroundColor:
             theme.colorScheme === "dark"
-              ? theme.colors.dark[6]
+              ? theme.colors.dark[5]
               : theme.colors.gray[0],
           color:
             theme.colorScheme === "dark"

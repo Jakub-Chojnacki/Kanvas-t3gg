@@ -53,6 +53,7 @@ const MyApp = ({ Component, pageProps }: AppProps & MantineProps) => {
         theme={{ colorScheme }}
         withGlobalStyles
         withNormalizeCSS
+        withCSSVariables 
       >
         <ClerkProvider
           {...pageProps}
