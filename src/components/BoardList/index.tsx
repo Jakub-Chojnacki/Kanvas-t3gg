@@ -19,8 +19,12 @@ const BoardList = () => {
         <Menu.Dropdown>
           {data?.map((board) => {
             return (
-              <Link className="no-underline" href={`/board/${board.id}`}>
-                <Menu.Item  key={board.id}>{board.name}</Menu.Item>
+              <Link
+                key={board.id}
+                className="no-underline"
+                href={`/board/${board.id}`}
+              >
+                <Menu.Item>{board.name}</Menu.Item>
               </Link>
             );
           })}

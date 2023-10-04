@@ -5,7 +5,7 @@ import {
   DropResult,
   Droppable,
 } from "@hello-pangea/dnd";
-import { Column, Task } from "@prisma/client";
+import { Column } from "@prisma/client";
 import toast from "react-hot-toast";
 
 import { RouterOutputs, api } from "~/utils/api";
@@ -20,13 +20,16 @@ type BoardData = NonNullable<RouterOutputs["boards"]["getById"]>;
 type ReorderSourceDestination = {
   source: DraggableLocation;
   destination: DraggableLocation;
+  draggableId?: string;
 };
 
 const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   const ctx = api.useContext();
 
   const [columnsData, setColumnsData] = useState<Column[]>([]);
-  const [tasksData, setTasksData] = useState<Task[]>([]);
+  const [tasksData, setTasksData] = useState<
+    RouterOutputs["tasks"]["getTasksByBoard"][number][]
+  >([]);
 
   const { data: columns } = api.columns.getColumnsByBoardId.useQuery({
     id: boardData.id,
@@ -70,7 +73,7 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   });
 
   const onDragEnd = (result: DropResult): void => {
-    const { destination, source, type } = result;
+    const { destination, source, type, draggableId } = result;
 
     if (!destination) return;
 
@@ -84,7 +87,8 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
 
       if (isSameColumn && destination.index === source.index) return;
 
-      if (!isSameColumn) handleChangeTaskColumn({ source, destination });
+      if (!isSameColumn)
+        handleChangeTaskColumn({ source, destination, draggableId });
 
       if (isSameColumn) handleReorderTask({ source, destination });
 
@@ -113,6 +117,7 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   const handleChangeTaskColumn = ({
     source,
     destination,
+    draggableId,
   }: ReorderSourceDestination): void => {
     const sourceColumnTasks = tasksData.filter(
       (task) => task.columnId === source.droppableId
@@ -122,7 +127,9 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
       (task) => task.columnId === destination.droppableId
     );
 
-    const sourceTask = sourceColumnTasks[source.index];
+    const sourceTask = sourceColumnTasks.find(
+      (task) => task.id === draggableId
+    );
     if (!sourceTask) return;
 
     const updatedSourceTask = {
@@ -178,19 +185,21 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
     setTasksData(reorderedTasks);
     reorderTasks({ reorderedTasks });
   };
+
   return (
-    <div className="flex flex-1 flex-row gap-2">
+    <div className="flex flex-row gap-2">
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable
           droppableId="all-columns"
           direction="horizontal"
           type={DROPPABLE_TYPE.COLUMN}
+          isDropDisabled={false}
         >
           {(provided) => (
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex flex-grow flex-row gap-4"
+              className="flex flex-row gap-4"
             >
               {columnsData?.sort(compareOrder)?.map((column, index) => (
                 <TaskColumn
