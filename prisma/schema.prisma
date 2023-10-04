@@ -54,6 +54,7 @@ model Column {
 model Task {
   id         String           @id @default(cuid())
   createdAt  DateTime         @default(now())
+  title      String
   content    String
   authorId   String
   assignedTo AssignedToTask[]

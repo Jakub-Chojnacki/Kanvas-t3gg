@@ -13,7 +13,7 @@ import { DROPPABLE_TYPE } from "../../const";
 
 type SingleTaskColumn = {
   column: RouterOutputs["columns"]["getColumnsByBoardId"][number];
-  tasks: Task[];
+  tasks: RouterOutputs["tasks"]["getTasksByBoard"][number][];
   index: number;
 };
 
@@ -25,7 +25,6 @@ const TaskColumn = ({ column, tasks, index }: SingleTaskColumn) => {
   const { mutate } = api.tasks.create.useMutation({
     onSuccess: async () => {
       setInput("");
-      await ctx.tasks.getTasksByColumn.invalidate();
     },
     onError: (e) => {
       toast.error(`${JSON.parse(e.message)[0].message}`);
@@ -37,13 +36,23 @@ const TaskColumn = ({ column, tasks, index }: SingleTaskColumn) => {
       {({ innerRef, dragHandleProps, draggableProps }) => (
         <div
           ref={innerRef}
+          className="flex h-[500px] w-[350px] flex-grow flex-col overflow-y-auto rounded-xl bg-zinc-900 p-4"
           {...draggableProps}
-          className="flex h-[500px] w-[350px] flex-col overflow-y-auto rounded border-2 border-solid border-gray-400 p-4"
         >
-          <div {...dragHandleProps}>{column.name}</div>
+          <div
+            className=" mb-4 border-0 border-b-2 border-solid border-gray-100 border-opacity-30 text-xl font-bold"
+            {...dragHandleProps}
+          >
+            {column.name}
+          </div>
           <Droppable droppableId={columnId} type={DROPPABLE_TYPE.TASK}>
             {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
+              // DON'T REMOVE flex-grow; It is necessary for dnd to work
+              <div
+                className="flex flex-grow flex-col gap-3"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
                 {tasks?.sort(compareOrder)?.map((task, index) => (
                   <SingleTask key={task.id} task={task} index={index} />
                 ))}
@@ -53,7 +62,12 @@ const TaskColumn = ({ column, tasks, index }: SingleTaskColumn) => {
           <div className="mt-auto">
             <button
               onClick={() =>
-                mutate({ content: input, columnId, boardId: column.boardId })
+                mutate({
+                  content: "Test content",
+                  columnId,
+                  boardId: column.boardId,
+                  title: input,
+                })
               }
             >
               Add a task

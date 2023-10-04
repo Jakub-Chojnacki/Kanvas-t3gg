@@ -30,17 +30,6 @@ export const tasksRouter = createTRPCRouter({
       author: filteredUsers.find((user) => user.id === task.authorId),
     }));
   }),
-  getTasksByColumn: privateProcedure
-    .input(z.object({ columnId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const tasks = await ctx.prisma.task.findMany({
-        where: { columnId: input.columnId },
-      });
-
-      if (!tasks) throw new TRPCError({ code: "NOT_FOUND" });
-
-      return tasks;
-    }),
   getTasksByBoard: privateProcedure
     .input(z.object({ boardId: z.string() }))
     .query(async ({ ctx, input: { boardId } }) => {
@@ -50,7 +39,17 @@ export const tasksRouter = createTRPCRouter({
 
       if (!tasks) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return tasks;
+      const users = await clerkClient.users.getUserList({
+        userId: tasks.map((task) => task.authorId),
+        limit: 100,
+      });
+
+      const filteredUsers = users.map(filterUserData);
+      
+      return tasks.map((task) => ({
+        ...task,
+        author: filteredUsers.find((user) => user.id === task.authorId),
+      }));
     }),
   getById: privateProcedure
     .input(z.object({ id: z.string() }))
@@ -69,9 +68,10 @@ export const tasksRouter = createTRPCRouter({
         content: z.string().min(1),
         columnId: z.string(),
         boardId: z.string(),
+        title:z.string()
       })
     )
-    .mutation(async ({ ctx, input: { content, columnId, boardId } }) => {
+    .mutation(async ({ ctx, input: { content, columnId, boardId,title } }) => {
       const authorId = ctx.userId;
       const order = await ctx.prisma.task.count();
       const newTask = await ctx.prisma.task.create({
@@ -81,6 +81,7 @@ export const tasksRouter = createTRPCRouter({
           columnId,
           order,
           boardId,
+          title
         },
       });
 
@@ -110,8 +111,6 @@ export const tasksRouter = createTRPCRouter({
             },
           });
         }
-
-
 
         console.log("Column order updated successfully.");
       } catch (error) {

@@ -25,7 +25,7 @@
     "@mantine/next": "^6.0.17",
     "@mantine/notifications": "^6.0.17",
     "@mantine/tiptap": "^6.0.17",
-    "@prisma/client": "^5.2.0",
+    "@prisma/client": "^5.4.0",
     "@t3-oss/env-nextjs": "^0.3.1",
     "@tabler/icons": "^2.30.0",
     "@tabler/icons-react": "^2.30.0",
