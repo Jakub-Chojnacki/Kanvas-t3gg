@@ -8,6 +8,7 @@ import {
   MediaQuery,
   useMantineTheme,
   Flex,
+  Center,
 } from "@mantine/core";
 import image from "./logo.svg";
 
@@ -48,10 +49,12 @@ const AppHeader = () => {
             </Link>
           </SignedOut>
           <SignedIn>
-            <Link href="/dashboard">
-              <NextImage alt="img" src={image} width={120} height={40} />
-            </Link>
-            <BoardList />
+            <Center className="gap-4">
+              <Link href="/dashboard">
+                <NextImage alt="img" src={image} width={120} height={40} />
+              </Link>
+              <BoardList />
+            </Center>
           </SignedIn>
           <Flex gap="sm" align="center">
             <ColorSchemeToggle />
