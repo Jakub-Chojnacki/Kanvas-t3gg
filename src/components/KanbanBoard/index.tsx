@@ -23,7 +23,11 @@ type ReorderSourceDestination = {
   draggableId?: string;
 };
 
-const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
+interface IKanbanBoard {
+  boardData: BoardData;
+}
+
+const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
   const ctx = api.useContext();
 
   const [columnsData, setColumnsData] = useState<Column[]>([]);
@@ -75,6 +79,7 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
   const onDragEnd = (result: DropResult): void => {
     const { destination, source, type, draggableId } = result;
 
+    console.log(destination, source, draggableId);
     if (!destination) return;
 
     if (type === DROPPABLE_TYPE.COLUMN) {
@@ -90,7 +95,7 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
       if (!isSameColumn)
         handleChangeTaskColumn({ source, destination, draggableId });
 
-      if (isSameColumn) handleReorderTask({ source, destination });
+      if (isSameColumn) handleReorderTask({ source, destination, draggableId });
 
       return;
     }
@@ -127,6 +132,10 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
       (task) => task.columnId === destination.droppableId
     );
 
+    // It should be sorted correctly but it's just a precaution
+    sourceColumnTasks.sort(compareOrder)
+    destinationColumnTasks.sort(compareOrder)
+
     const sourceTask = sourceColumnTasks.find(
       (task) => task.id === draggableId
     );
@@ -137,9 +146,12 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
       columnId: destination.droppableId,
     };
 
-    sourceColumnTasks.splice(source.index, 1);
-    destinationColumnTasks.splice(destination.index, 0, updatedSourceTask);
+    const sourceTaskIndex = sourceColumnTasks.findIndex(
+      (task) => task.id === draggableId
+    );
 
+    sourceColumnTasks.splice(sourceTaskIndex, 1);
+    destinationColumnTasks.splice(destination.index, 0, updatedSourceTask);
     const destinationNewOrder = destinationColumnTasks.map((task, index) => ({
       ...task,
       order: index,
@@ -166,6 +178,8 @@ const KanbanBoard = ({ boardData }: { boardData: BoardData }) => {
     const destinationColumnTasks = tasksData.filter(
       (task) => task.columnId === destination.droppableId
     );
+
+    destinationColumnTasks.sort(compareOrder);
 
     const [movedTask] = destinationColumnTasks.splice(source.index, 1);
     if (!movedTask) return;

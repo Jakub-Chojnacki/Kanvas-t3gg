@@ -18,5 +18,5 @@ export default {
     },
   },
   corePlugins: { preflight: false },
-  plugins: [],
+  plugins: [require("tailwind-scrollbar")({ nocompatible: true })],
 } satisfies Config;

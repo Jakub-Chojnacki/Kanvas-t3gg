@@ -65,7 +65,7 @@ export const tasksRouter = createTRPCRouter({
   create: privateProcedure
     .input(
       z.object({
-        content: z.string().min(1),
+        content: z.string(),
         columnId: z.string(),
         boardId: z.string(),
         title:z.string()
@@ -81,7 +81,7 @@ export const tasksRouter = createTRPCRouter({
           columnId,
           order,
           boardId,
-          title
+          title,
         },
       });
 
@@ -117,4 +117,22 @@ export const tasksRouter = createTRPCRouter({
         console.error("Error updating column order:", error);
       }
     }),
+    deleteTask: privateProcedure.input(z.object({
+      taskId: z.string()
+    })).mutation(async ({ ctx, input: { taskId } }) => {
+      try {
+
+        const deletedTask = await ctx.prisma.task.delete({
+          where: {
+            id: taskId
+          }
+        })
+
+        return deletedTask
+  
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
+  
+    })
 });

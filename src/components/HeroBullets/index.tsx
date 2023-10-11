@@ -12,7 +12,7 @@ import {
 import { IconCheck } from "@tabler/icons-react";
 import image from "./hero-bullets.svg";
 
-export function HeroBullets() {
+const HeroBullets = () => {
   return (
     <Container size="md">
       <div className=" flex justify-between pb-32 pt-32">
@@ -76,4 +76,6 @@ export function HeroBullets() {
       </div>
     </Container>
   );
-}
+};
+
+export default HeroBullets;

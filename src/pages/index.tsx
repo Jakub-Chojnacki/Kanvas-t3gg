@@ -1,6 +1,6 @@
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/router";
-import { HeroBullets } from "~/components/HeroBullets";
+import HeroBullets from "~/components/HeroBullets";
 
 const Home = () => {
   const { user } = useUser();

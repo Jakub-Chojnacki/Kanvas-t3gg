@@ -58,4 +58,29 @@ export const columnsRouter = createTRPCRouter({
         console.error("Error updating column order:", error);
       }
     }),
+  deleteColumn: privateProcedure
+    .input(
+      z.object({
+        columnId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { columnId } }) => {
+      try {
+        const deletedTasks = await ctx.prisma.task.deleteMany({
+          where: {
+            columnId,
+          },
+        });
+
+        const deletedColumn = await ctx.prisma.column.delete({
+          where: {
+            id: columnId,
+          },
+        });
+
+        return { deletedTasks, deletedColumn };
+      } catch (error) {
+        console.error("Error deleting column:", error);
+      }
+    }),
 });

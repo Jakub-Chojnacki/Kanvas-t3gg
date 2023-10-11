@@ -1,24 +1,34 @@
 import { Avatar, Flex, Text } from "@mantine/core";
 import { Draggable } from "@hello-pangea/dnd";
+import { useRouter } from "next/router";
+
 import { RouterOutputs } from "~/utils/api";
-import { Fragment } from "react";
 
 type TaskWithUser = RouterOutputs["tasks"]["getTasksByBoard"][number];
 
-const SingleTask = ({ task, index }: { task: TaskWithUser; index: number }) => {
-  const { content, id } = task;
+interface ISingleTask {
+  task: TaskWithUser;
+  index: number;
+}
+
+const SingleTask: React.FC<ISingleTask> = ({ task, index }) => {
+  const { content, id, title, boardId } = task;
+  const { push } = useRouter();
+  const handleOpenTaskModal = () => push(`/board/${boardId}/task/${id}`);
 
   return (
     <Draggable draggableId={id} index={index}>
       {({ innerRef, dragHandleProps, draggableProps }) => (
         <div
+          onClick={handleOpenTaskModal}
           ref={innerRef}
           {...dragHandleProps}
           {...draggableProps}
-          className="flex min-h-[100px] max-w-xs  cursor-grab flex-col  rounded-xl bg-zinc-800 px-4 py-6"
+          className="flex min-h-[100px] max-w-xs  cursor-grab  flex-col  justify-between rounded-xl bg-zinc-800 px-4 py-2"
         >
-          <Text className="text-lg font-bold">{"Title"}</Text>
-          <Text>{content}</Text>
+          <Text className="w-fit cursor-pointer  text-md font-bold">
+            {title}
+          </Text>
 
           <Flex gap="md" align="center">
             {task.author && (

@@ -32,6 +32,9 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
                   : theme.colors.gray[0],
               minHeight: `calc(100vh - ${headerHeight}px)`,
             },
+            root: {
+              maxWidth: "100%",
+            },
           }}
           navbarOffsetBreakpoint="sm"
           asideOffsetBreakpoint="sm"
@@ -41,7 +44,7 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
                 p="md"
                 hiddenBreakpoint="sm"
                 hidden={!isOpened}
-                width={{ sm: 200, lg: 300 }}
+                width={{ sm: 150, lg: 200 }}
               >
                 {sideNav}
               </Navbar>
