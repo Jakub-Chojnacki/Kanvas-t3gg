@@ -2,17 +2,21 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 
+import { compareOrder } from "~/components/KanbanBoard/utils";
+
 export const columnsRouter = createTRPCRouter({
   getColumnsByBoardId: privateProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const column = await ctx.prisma.column.findMany({
+      const columns = await ctx.prisma.column.findMany({
         where: { boardId: input.id },
       });
 
-      if (!column) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!columns) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return column;
+      columns.sort(compareOrder);
+
+      return columns;
     }),
   create: privateProcedure
     .input(

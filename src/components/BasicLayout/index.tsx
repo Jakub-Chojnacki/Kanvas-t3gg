@@ -17,7 +17,7 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
     <Flex w="100%" mih="100vh" direction="column">
       <AppHeader />
       <Flex
-        bg={theme.colorScheme === "dark" ? "dark.6" : "white"}
+        bg={theme.colorScheme === "dark" ? theme.colors.gray[9] : "white"}
         w="100%"
         h={`calc(100vh - ${headerHeight}px)`}
         align="center"
@@ -28,8 +28,8 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
             main: {
               background:
                 theme.colorScheme === "dark"
-                  ? theme.colors.dark[6]
-                  : theme.colors.gray[0],
+                  ? theme.colors.gray[9]
+                  : "white",
               minHeight: `calc(100vh - ${headerHeight}px)`,
             },
             root: {
@@ -45,6 +45,11 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
                 hiddenBreakpoint="sm"
                 hidden={!isOpened}
                 width={{ sm: 150, lg: 200 }}
+                bg={
+                  theme.colorScheme === "dark"
+                    ? theme.colors.gray[9]
+                    : "white"
+                }
               >
                 {sideNav}
               </Navbar>

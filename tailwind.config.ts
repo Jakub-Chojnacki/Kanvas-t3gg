@@ -14,6 +14,15 @@ export default {
         logoGreen: "#24b57e",
         logoGreenLight: "#51e5a5",
         logoPink: "#E4759F",
+        dark: "#09090b",
+        mantineDark: {
+          0: "#C1C2C5",
+          4:"#373A40"
+        },
+        mantineGray: {
+          0: "#F8F9FA",
+          4: "#CED4DA",
+        },
       },
     },
   },

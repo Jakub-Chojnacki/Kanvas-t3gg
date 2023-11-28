@@ -1,9 +1,11 @@
-import { Box, Button, Text, Textarea } from "@mantine/core";
+import { Box, Button, Text, Textarea, useMantineTheme } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { IconCheck, IconPlus, IconX } from "@tabler/icons-react";
-import { useState } from "react";
+import {useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { z } from "zod";
+
+import useHandleClickOutside from "~/hooks/useHandleClickOutside";
 
 import { api } from "~/utils/api";
 
@@ -27,6 +29,13 @@ interface FormValues {
 const SimpleAddTask: React.FC<SimpleAddTask> = ({ columnId, boardId }) => {
   const [isAddingTask, setIsAddingTask] = useState(false);
   const ctx = api.useContext();
+  const theme = useMantineTheme()
+
+  const toggleIsAddingTask = (): void => setIsAddingTask((prev) => !prev);
+  const formRef = useRef(null);
+
+  useHandleClickOutside(formRef, toggleIsAddingTask);
+
   const { mutate } = api.tasks.create.useMutation({
     onSuccess: async () => {
       toast.success("A task has been added.");
@@ -52,9 +61,10 @@ const SimpleAddTask: React.FC<SimpleAddTask> = ({ columnId, boardId }) => {
   const handleSubmit = (data: FormValues): void => {
     const { columnId, boardId, title, content } = data;
     mutate({ columnId, boardId, title, content });
-  };
+    toggleIsAddingTask()
 
-  const toggleIsAddingTask = (): void => setIsAddingTask((prev) => !prev);
+    form.reset()
+  };
 
   return (
     <Box className="p-4">
@@ -69,18 +79,18 @@ const SimpleAddTask: React.FC<SimpleAddTask> = ({ columnId, boardId }) => {
       )}
 
       {isAddingTask && (
-        <Box className="scroll w-[100%] rounded-md border-[1px] border-solid border-white border-opacity-40 bg-[#25262b]">
-          <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Box className="scroll w-[100%] rounded-md border-[1px] border-solid border-zinc-700">
+          <form onSubmit={form.onSubmit(handleSubmit)} ref={formRef}>
             <Textarea
               classNames={{
                 input:
-                  "border-none scrollbar scrollbar-thin scrollbar-thumb-gray-600 scrollbar-thumb-rounded scrollbar-h-[10px] ",
+                  "border-none scrollbar scrollbar-thin scrollbar-thumb-gray-600 scrollbar-thumb-rounded scrollbar-h-[10px]",
               }}
               variant="default"
               placeholder="Enter task title..."
               {...form.getInputProps("title")}
             />
-            <Box className="flex flex-row justify-end gap-2 align-middle">
+            <Box className="flex flex-row justify-end gap-2 align-middle" bg={theme.colorScheme === 'dark' ? theme.colors.gray[9]: 'white'}>
               <Button
                 variant="subtle"
                 className="h-[30px] w-[30px] p-0"

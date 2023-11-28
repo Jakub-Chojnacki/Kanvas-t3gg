@@ -4,6 +4,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 
+import { compareOrder } from "~/components/KanbanBoard/utils";
+
 const filterUserData = (user: User) => {
   return {
     id: user.id,
@@ -45,7 +47,9 @@ export const tasksRouter = createTRPCRouter({
       });
 
       const filteredUsers = users.map(filterUserData);
-      
+
+      tasks.sort(compareOrder);
+
       return tasks.map((task) => ({
         ...task,
         author: filteredUsers.find((user) => user.id === task.authorId),
@@ -68,10 +72,10 @@ export const tasksRouter = createTRPCRouter({
         content: z.string(),
         columnId: z.string(),
         boardId: z.string(),
-        title:z.string()
+        title: z.string(),
       })
     )
-    .mutation(async ({ ctx, input: { content, columnId, boardId,title } }) => {
+    .mutation(async ({ ctx, input: { content, columnId, boardId, title } }) => {
       const authorId = ctx.userId;
       const order = await ctx.prisma.task.count();
       const newTask = await ctx.prisma.task.create({
@@ -117,22 +121,23 @@ export const tasksRouter = createTRPCRouter({
         console.error("Error updating column order:", error);
       }
     }),
-    deleteTask: privateProcedure.input(z.object({
-      taskId: z.string()
-    })).mutation(async ({ ctx, input: { taskId } }) => {
+  deleteTask: privateProcedure
+    .input(
+      z.object({
+        taskId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { taskId } }) => {
       try {
-
         const deletedTask = await ctx.prisma.task.delete({
           where: {
-            id: taskId
-          }
-        })
+            id: taskId,
+          },
+        });
 
-        return deletedTask
-  
+        return deletedTask;
       } catch (error) {
         console.error("Error deleting task:", error);
       }
-  
-    })
+    }),
 });

@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import toast from "react-hot-toast";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { IconTrash } from "@tabler/icons-react";
-import { Text } from "@mantine/core";
+import { Box, Text, useMantineTheme } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
@@ -25,6 +25,7 @@ type SingleTaskColumn = {
 
 const TaskColumn: React.FC<SingleTaskColumn> = ({ column, tasks, index }) => {
   const { push } = useRouter();
+  const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const { id: columnId, boardId } = column;
 
@@ -63,13 +64,31 @@ const TaskColumn: React.FC<SingleTaskColumn> = ({ column, tasks, index }) => {
       />
       <Draggable draggableId={columnId} index={index}>
         {({ innerRef, dragHandleProps, draggableProps }) => (
-          <div
+          <Box
             ref={innerRef}
-            className="flex  w-[350px] flex-col rounded-xl bg-zinc-900"
+            className="flex  w-[350px] flex-col rounded-xl"
             {...draggableProps}
+            style={{
+              ...draggableProps.style,
+              border: "1px solid",
+              borderColor:
+                theme.colorScheme === "dark"
+                  ? theme.colors.gray[8]
+                  : theme.colors.gray[2],
+              background:
+                theme.colorScheme === "dark"
+                  ? theme.colors.dark[7]
+                  : theme.colors.gray[0],
+            }}
           >
-            <div
+            <Box
               className=" mb-4 flex flex-row justify-between border-0 border-b-2 border-solid border-gray-100 border-opacity-30 p-4 align-middle text-xl font-bold"
+              style={{
+                background:
+                theme.colorScheme === "dark"
+                  ? theme.colors.dark[7]
+                  : theme.colors.gray[0],
+              }}
               {...dragHandleProps}
             >
               <Text>{column.name}</Text>
@@ -77,7 +96,7 @@ const TaskColumn: React.FC<SingleTaskColumn> = ({ column, tasks, index }) => {
                 className="cursor-pointer"
                 onClick={handleOpenDeleteModal}
               />
-            </div>
+            </Box>
             <Droppable droppableId={columnId} type={DROPPABLE_TYPE.TASK}>
               {(provided) => (
                 // DON'T REMOVE flex-grow; It is necessary for dnd to work
@@ -93,7 +112,7 @@ const TaskColumn: React.FC<SingleTaskColumn> = ({ column, tasks, index }) => {
               )}
             </Droppable>
             <SimpleAddTask columnId={columnId} boardId={boardId} />
-          </div>
+          </Box>
         )}
       </Draggable>
     </Fragment>
