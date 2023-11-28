@@ -17,14 +17,22 @@ import SignUpButton from "../SignUpButton";
 import ColorSchemeToggle from "../ColorSchemeToggle";
 import BoardList from "../BoardList";
 
-export const headerHeight = 70;
+export const headerHeight = 60;
 
 const AppHeader = () => {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
 
   return (
-    <Header height={headerHeight} p="md">
+    <Header
+      height={headerHeight}
+      p="md"
+      bg={
+        theme.colorScheme === "dark"
+          ? theme.colors.gray[9]
+          : 'white'
+      }
+    >
       <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
         <MediaQuery largerThan="sm" styles={{ display: "none" }}>
           <Burger

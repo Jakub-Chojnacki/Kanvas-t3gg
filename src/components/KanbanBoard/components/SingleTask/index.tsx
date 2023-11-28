@@ -1,4 +1,4 @@
-import { Avatar, Flex, Text } from "@mantine/core";
+import { Avatar, Box, Flex, Text, useMantineTheme } from "@mantine/core";
 import { Draggable } from "@hello-pangea/dnd";
 import { useRouter } from "next/router";
 
@@ -12,21 +12,23 @@ interface ISingleTask {
 }
 
 const SingleTask: React.FC<ISingleTask> = ({ task, index }) => {
-  const { content, id, title, boardId } = task;
+  const { id, title, boardId } = task;
+  const theme = useMantineTheme();
   const { push } = useRouter();
   const handleOpenTaskModal = () => push(`/board/${boardId}/task/${id}`);
 
   return (
     <Draggable draggableId={id} index={index}>
       {({ innerRef, dragHandleProps, draggableProps }) => (
-        <div
+        <Box
           onClick={handleOpenTaskModal}
           ref={innerRef}
           {...dragHandleProps}
           {...draggableProps}
-          className="flex min-h-[100px] max-w-xs  cursor-grab  flex-col  justify-between rounded-xl bg-zinc-800 px-4 py-2"
+          bg={theme.colorScheme === "dark" ? theme.colors.gray[9] : "white"}
+          className="flex min-h-[100px] max-w-xs  cursor-grab  flex-col  justify-between rounded-xl px-4 py-2"
         >
-          <Text className="w-fit cursor-pointer  text-md font-bold">
+          <Text className="text-md w-fit  cursor-pointer font-bold">
             {title}
           </Text>
 
@@ -35,7 +37,7 @@ const SingleTask: React.FC<ISingleTask> = ({ task, index }) => {
               <Avatar src={task.author.profileImageUrl} radius="xl" size="sm" />
             )}
           </Flex>
-        </div>
+        </Box>
       )}
     </Draggable>
   );
