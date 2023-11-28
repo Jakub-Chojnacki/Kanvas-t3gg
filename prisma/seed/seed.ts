@@ -19,7 +19,7 @@ async function seed() {
       },
     });
 
-    const newColumn = await prisma.column.create({
+    const toDoColumn = await prisma.column.create({
       data: {
         name: "To do",
         boardId: newBoard.id,
@@ -27,13 +27,22 @@ async function seed() {
       },
     });
 
+    const doneColumn = await prisma.column.create({
+      data: {
+        name: "Done",
+        boardId: newBoard.id,
+        order: 1,
+      },
+    });
+
     await prisma.task.create({
       data: {
         authorId: process.env.MOCK_USER_ID!!,
-        content: "Test task",
+        content: "Lorem ipsum test content",
         order: 0,
-        columnId: newColumn.id,
-        boardId:newBoard.id
+        columnId: toDoColumn.id,
+        boardId:newBoard.id,
+        title:'Test task',
       },
     });
 

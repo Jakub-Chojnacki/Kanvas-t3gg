@@ -15,17 +15,8 @@ model Board {
 
   columns Column[]
   members BoardMember[]
-  Task    Task[]
-}
-
-model AssignedToTask {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  Task       Task     @relation(fields: [taskId], references: [id])
-  taskId     String
-  assignedAt DateTime @default(now())
-
-  @@index([taskId])
+  tasks   Task[]
+  tags    Tag[]
 }
 
 model BoardMember {
@@ -46,7 +37,8 @@ model Column {
   boardId String
   order   Int
 
-  tasks Task[]
+  tasks      Task[]
+  isArchived Boolean @default(false)
 
   @@index([boardId])
 }
@@ -54,10 +46,13 @@ model Column {
 model Task {
   id         String           @id @default(cuid())
   createdAt  DateTime         @default(now())
+  dueDate DateTime? 
+  title      String
   content    String
   authorId   String
   assignedTo AssignedToTask[]
   order      Int
+  isArchived Boolean @default(false)
 
   Column   Column @relation(fields: [columnId], references: [id])
   columnId String
@@ -66,9 +61,30 @@ model Task {
   boardId String
 
   Comments Comment[]
+  tags     TagsOnTasks[]
 
   @@index([columnId])
   @@index([boardId])
+}
+
+model AssignedToTask {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  Task       Task     @relation(fields: [taskId], references: [id])
+  taskId     String
+  assignedAt DateTime @default(now())
+
+  @@index([taskId])
+}
+
+model TagsOnTasks {
+  id String @id @default(cuid())
+
+  taskId String
+  Task   Task   @relation(fields: [taskId], references: [id])
+  tagId  String
+
+  @@index([taskId])
 }
 
 model Comment {
@@ -82,4 +98,15 @@ model Comment {
   taskId String
 
   @@index([taskId])
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String
+  color String
+
+  boardId String
+  Board   Board  @relation(fields: [boardId], references: [id])
+
+  @@index([boardId])
 }
