@@ -28,9 +28,7 @@ const SingleTaskPage: NextPage<{ boardId: string; taskId: string }> = ({
       <Head>
         <title>{`${data?.id}`}</title>
       </Head>
-      <BasicLayout sideNav={boardSidenav}>
-        <KanbanBoard boardData={boardData} />
-
+      <BasicLayout sideNav={boardSidenav} paddingTop={0}>
         <TaskDetails boardId={boardId} taskId={taskId} taskData={data} />
       </BasicLayout>
     </>
@@ -46,7 +44,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   if (typeof boardId !== "string") throw new Error("no board id");
 
-  await ssg.boards.getById.prefetch({ id:boardId });
+  await ssg.boards.getById.prefetch({ id: boardId });
 
   if (typeof taskId !== "string") throw new Error("no task id");
 

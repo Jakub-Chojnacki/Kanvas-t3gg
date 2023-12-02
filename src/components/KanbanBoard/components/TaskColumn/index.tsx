@@ -34,7 +34,6 @@ const TaskColumn: React.FC<SingleTaskColumn> = ({ column, tasks, index }) => {
   const { mutate: deleteColumn } = api.columns.deleteColumn.useMutation({
     onSuccess: async () => {
       await ctx.columns.getColumnsByBoardId.invalidate({ id: boardId });
-      close();
     },
     onError: (e) => {
       toast.error(`${JSON.parse(e.message)[0].message}`);
@@ -85,9 +84,9 @@ const TaskColumn: React.FC<SingleTaskColumn> = ({ column, tasks, index }) => {
               className=" mb-4 flex flex-row justify-between border-0 border-b-2 border-solid border-gray-100 border-opacity-30 p-4 align-middle text-xl font-bold"
               style={{
                 background:
-                theme.colorScheme === "dark"
-                  ? theme.colors.dark[7]
-                  : theme.colors.gray[0],
+                  theme.colorScheme === "dark"
+                    ? theme.colors.dark[7]
+                    : theme.colors.gray[0],
               }}
               {...dragHandleProps}
             >
@@ -108,6 +107,7 @@ const TaskColumn: React.FC<SingleTaskColumn> = ({ column, tasks, index }) => {
                   {tasks?.sort(compareOrder)?.map((task, index) => (
                     <SingleTask key={task.id} task={task} index={index} />
                   ))}
+                  {provided.placeholder}
                 </div>
               )}
             </Droppable>

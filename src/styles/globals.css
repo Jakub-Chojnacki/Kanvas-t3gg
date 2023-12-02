@@ -7,6 +7,6 @@
     @apply border-[2px] border-solid border-mantineDark-4 ;
   }
   .border-inner {
-    @apply border-[1px] border-solid border-zinc-700;
+    @apply border-[1px] border-solid border-mantineGray-8;
   }
 }

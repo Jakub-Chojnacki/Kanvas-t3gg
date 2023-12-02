@@ -17,11 +17,13 @@ export default {
         dark: "#09090b",
         mantineDark: {
           0: "#C1C2C5",
-          4:"#373A40"
+          4: "#373A40",
         },
         mantineGray: {
           0: "#F8F9FA",
           4: "#CED4DA",
+          8: "#343A40",
+          9: "#212529",
         },
       },
     },

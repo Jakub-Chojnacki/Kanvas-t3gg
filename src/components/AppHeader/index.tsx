@@ -32,6 +32,8 @@ const AppHeader = () => {
           ? theme.colors.gray[9]
           : 'white'
       }
+      zIndex={100}
+      className="border-solid border-0 border-b-2  border-mantineGray-8"
     >
       <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
         <MediaQuery largerThan="sm" styles={{ display: "none" }}>
