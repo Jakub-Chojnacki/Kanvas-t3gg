@@ -4,7 +4,17 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 
-const filterUserData = (user: User) => {
+import { compareOrder } from "~/components/KanbanBoard/utils";
+
+export interface IFilteredUser {
+  id: string;
+  username: string | null;
+  profileImageUrl: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
+export const filterUserData = (user: User): IFilteredUser => {
   return {
     id: user.id,
     username: user.username,
@@ -45,7 +55,9 @@ export const tasksRouter = createTRPCRouter({
       });
 
       const filteredUsers = users.map(filterUserData);
-      
+
+      tasks.sort(compareOrder);
+
       return tasks.map((task) => ({
         ...task,
         author: filteredUsers.find((user) => user.id === task.authorId),
@@ -56,11 +68,24 @@ export const tasksRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const task = await ctx.prisma.task.findUnique({
         where: { id: input.id },
+        include: {
+          assignedTo: true,
+        },
       });
 
       if (!task) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return task;
+      const createdByUser = await clerkClient.users.getUser(task.authorId);
+
+      const users = task.assignedTo.length
+        ? await clerkClient.users.getUserList({
+            userId: task.assignedTo.map((member) => member.userId),
+          })
+        : [];
+
+      const assignedMembers = users.map(filterUserData);
+
+      return { ...task, createdByUser, assignedMembers };
     }),
   create: privateProcedure
     .input(
@@ -68,10 +93,10 @@ export const tasksRouter = createTRPCRouter({
         content: z.string(),
         columnId: z.string(),
         boardId: z.string(),
-        title:z.string()
+        title: z.string(),
       })
     )
-    .mutation(async ({ ctx, input: { content, columnId, boardId,title } }) => {
+    .mutation(async ({ ctx, input: { content, columnId, boardId, title } }) => {
       const authorId = ctx.userId;
       const order = await ctx.prisma.task.count();
       const newTask = await ctx.prisma.task.create({
@@ -112,27 +137,92 @@ export const tasksRouter = createTRPCRouter({
           });
         }
 
-        console.log("Column order updated successfully.");
       } catch (error) {
         console.error("Error updating column order:", error);
       }
     }),
-    deleteTask: privateProcedure.input(z.object({
-      taskId: z.string()
-    })).mutation(async ({ ctx, input: { taskId } }) => {
+  deleteTask: privateProcedure
+    .input(
+      z.object({
+        taskId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { taskId } }) => {
       try {
-
         const deletedTask = await ctx.prisma.task.delete({
           where: {
-            id: taskId
-          }
-        })
+            id: taskId,
+          },
+        });
 
-        return deletedTask
-  
+        return deletedTask;
       } catch (error) {
         console.error("Error deleting task:", error);
       }
-  
-    })
+    }),
+  updateTask: privateProcedure
+    .input(
+      z.object({
+        taskId: z.string(),
+        columnId: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input: { taskId, columnId } }) => {
+      try {
+        const updatedTask = await ctx.prisma.task.update({
+          where: {
+            id: taskId,
+          },
+          data: {
+            columnId,
+          },
+        });
+
+        return updatedTask;
+      } catch (error) {
+        console.error("Error updating task:", error);
+      }
+    }),
+  assignPersonToTask: privateProcedure
+    .input(
+      z.object({
+        taskId: z.string(),
+        userId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { taskId, userId } }) => {
+      try {
+        const userOnTask = await ctx.prisma.assignedToTask.create({
+          data: {
+            taskId,
+            userId,
+          },
+        });
+
+        return userOnTask;
+      } catch (error) {
+        console.error("Error assigning user to task:", error);
+      }
+    }),
+  deleteAssignedPerson: privateProcedure
+    .input(
+      z.object({
+        taskId: z.string(),
+        userId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { taskId, userId } }) => {
+      try {
+        const userOnTask = await ctx.prisma.assignedToTask.delete({
+          where: {
+            taskId,
+            userId,
+          },
+        });
+
+        return userOnTask;
+      } catch (error) {
+        console.error("Error assigning user to task:", error);
+      }
+    }),
 });

@@ -1,6 +1,7 @@
-import { Column } from "@prisma/client";
+import { clerkClient } from "@clerk/nextjs";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
+import { filterUserData } from "./tasks";
 
 export const boardsRouter = createTRPCRouter({
   getAll: privateProcedure.query(async ({ ctx }) => {
@@ -52,5 +53,23 @@ export const boardsRouter = createTRPCRouter({
       });
 
       return newBoard;
+    }),
+  getBoardMembers: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const members = await ctx.prisma.boardMember.findMany({
+        where: {
+          boardId: input.id,
+        },
+      });
+
+      const users = await clerkClient.users.getUserList({
+        userId: members.map((member) => member.userId),
+        limit: 100,
+      });
+  
+      const filteredUsers = users.map(filterUserData);
+
+      return filteredUsers;
     }),
 });

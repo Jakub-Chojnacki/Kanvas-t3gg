@@ -7,9 +7,10 @@ import { headerHeight } from "../AppHeader";
 interface IBasicLayoutProps {
   children?: ReactNode;
   sideNav?: ReactNode;
+  paddingTop?: number | string;
 }
 
-const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
+const BasicLayout = ({ children, sideNav, paddingTop }: IBasicLayoutProps) => {
   const theme = useMantineTheme();
   const [isOpened, setIsOpened] = useState(false);
 
@@ -17,7 +18,7 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
     <Flex w="100%" mih="100vh" direction="column">
       <AppHeader />
       <Flex
-        bg={theme.colorScheme === "dark" ? "dark.6" : "white"}
+        bg={theme.colorScheme === "dark" ? theme.colors.gray[9] : "white"}
         w="100%"
         h={`calc(100vh - ${headerHeight}px)`}
         align="center"
@@ -26,10 +27,11 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
         <AppShell
           styles={{
             main: {
+              paddingTop: paddingTop ?? '1rem',
               background:
                 theme.colorScheme === "dark"
-                  ? theme.colors.dark[6]
-                  : theme.colors.gray[0],
+                  ? theme.colors.gray[9]
+                  : "white",
               minHeight: `calc(100vh - ${headerHeight}px)`,
             },
             root: {
@@ -45,6 +47,12 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
                 hiddenBreakpoint="sm"
                 hidden={!isOpened}
                 width={{ sm: 150, lg: 200 }}
+                bg={
+                  theme.colorScheme === "dark"
+                    ? theme.colors.gray[9]
+                    : "white"
+                }
+                className="border-solid border-0 border-r-2  border-mantineGray-8"
               >
                 {sideNav}
               </Navbar>

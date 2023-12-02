@@ -14,6 +14,7 @@ import { compareOrder } from "./utils";
 import TaskColumn from "./components/TaskColumn";
 
 import { DROPPABLE_TYPE } from "./const";
+import { Box, useMantineTheme } from "@mantine/core";
 
 type BoardData = NonNullable<RouterOutputs["boards"]["getById"]>;
 
@@ -29,6 +30,7 @@ interface IKanbanBoard {
 
 const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
   const ctx = api.useContext();
+  const boardId = boardData.id;
 
   const [columnsData, setColumnsData] = useState<Column[]>([]);
   const [tasksData, setTasksData] = useState<
@@ -36,10 +38,10 @@ const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
   >([]);
 
   const { data: columns } = api.columns.getColumnsByBoardId.useQuery({
-    id: boardData.id,
+    id: boardId,
   });
   const { data: tasks } = api.tasks.getTasksByBoard.useQuery({
-    boardId: boardData.id,
+    boardId,
   });
 
   useEffect(() => {
@@ -68,7 +70,11 @@ const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
   });
 
   const { mutate: reorderTasks } = api.tasks.reorderTasks.useMutation({
-    onSuccess: async () => {
+    onMutate: async ({ reorderedTasks }) => {
+      const previousTodos = ctx.tasks.getTasksByBoard.getData({ boardId });
+
+      ctx.tasks.getTasksByBoard.setData({ boardId }, reorderedTasks);
+
       await ctx.columns.getColumnsByBoardId.invalidate({ id: boardData.id });
     },
     onError: (e) => {
@@ -79,7 +85,6 @@ const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
   const onDragEnd = (result: DropResult): void => {
     const { destination, source, type, draggableId } = result;
 
-    console.log(destination, source, draggableId);
     if (!destination) return;
 
     if (type === DROPPABLE_TYPE.COLUMN) {
@@ -133,8 +138,8 @@ const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
     );
 
     // It should be sorted correctly but it's just a precaution
-    sourceColumnTasks.sort(compareOrder)
-    destinationColumnTasks.sort(compareOrder)
+    sourceColumnTasks.sort(compareOrder);
+    destinationColumnTasks.sort(compareOrder);
 
     const sourceTask = sourceColumnTasks.find(
       (task) => task.id === draggableId
@@ -196,12 +201,13 @@ const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
       ...updatedTasks,
     ];
 
-    setTasksData(reorderedTasks);
     reorderTasks({ reorderedTasks });
   };
 
   return (
-    <div className="flex flex-row gap-2">
+    <Box
+      className="flex h-[100%] flex-row gap-2"
+    >
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable
           droppableId="all-columns"
@@ -210,27 +216,27 @@ const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
           isDropDisabled={false}
         >
           {(provided) => (
-            <div
+            <Box
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex flex-row gap-4"
+              className="flex flex-row gap-4 "
             >
               {columnsData?.sort(compareOrder)?.map((column, index) => (
                 <TaskColumn
                   key={column.id}
                   column={column}
                   index={index}
-                  tasks={tasksData.filter(
-                    (task) => task.columnId === column.id
-                  )}
+                  tasks={
+                    tasks?.filter((task) => task.columnId === column.id) || []
+                  }
                 />
               ))}
               {provided.placeholder}
-            </div>
+            </Box>
           )}
         </Droppable>
       </DragDropContext>
-    </div>
+    </Box>
   );
 };
 

@@ -26,7 +26,7 @@
     "@mantine/next": "^6.0.17",
     "@mantine/notifications": "^6.0.17",
     "@mantine/tiptap": "^6.0.17",
-    "@prisma/client": "^5.4.0",
+    "@prisma/client": "^5.6.0",
     "@t3-oss/env-nextjs": "^0.3.1",
     "@tabler/icons": "^2.30.0",
     "@tabler/icons-react": "^2.30.0",
@@ -67,7 +67,7 @@
     "postcss": "^8.4.21",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.2.8",
-    "prisma": "^5.0.0",
+    "prisma": "^5.6.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5.0.4"
   },
