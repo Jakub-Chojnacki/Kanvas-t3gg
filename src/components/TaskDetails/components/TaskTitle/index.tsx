@@ -11,7 +11,7 @@ const TaskTitle = ({ editorContent }: { editorContent: string }) => {
   });
 
   return (
-    <Box className="w-[100%]">
+    <Box className="w-[100%] text-3xl">
       <EditorContent editor={editor} />
     </Box>
   );

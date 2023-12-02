@@ -7,9 +7,10 @@ import { headerHeight } from "../AppHeader";
 interface IBasicLayoutProps {
   children?: ReactNode;
   sideNav?: ReactNode;
+  paddingTop?: number | string;
 }
 
-const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
+const BasicLayout = ({ children, sideNav, paddingTop }: IBasicLayoutProps) => {
   const theme = useMantineTheme();
   const [isOpened, setIsOpened] = useState(false);
 
@@ -26,6 +27,7 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
         <AppShell
           styles={{
             main: {
+              paddingTop: paddingTop ?? '1rem',
               background:
                 theme.colorScheme === "dark"
                   ? theme.colors.gray[9]
@@ -50,6 +52,7 @@ const BasicLayout = ({ children, sideNav }: IBasicLayoutProps) => {
                     ? theme.colors.gray[9]
                     : "white"
                 }
+                className="border-solid border-0 border-r-2  border-mantineGray-8"
               >
                 {sideNav}
               </Navbar>

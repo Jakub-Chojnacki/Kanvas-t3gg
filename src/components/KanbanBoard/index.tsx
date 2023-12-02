@@ -85,7 +85,6 @@ const KanbanBoard: React.FC<IKanbanBoard> = ({ boardData }) => {
   const onDragEnd = (result: DropResult): void => {
     const { destination, source, type, draggableId } = result;
 
-    console.log(destination, source, draggableId);
     if (!destination) return;
 
     if (type === DROPPABLE_TYPE.COLUMN) {

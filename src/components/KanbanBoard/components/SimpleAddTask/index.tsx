@@ -79,7 +79,7 @@ const SimpleAddTask: React.FC<SimpleAddTask> = ({ columnId, boardId }) => {
       )}
 
       {isAddingTask && (
-        <Box className="scroll w-[100%] rounded-md border-[1px] border-solid border-zinc-700">
+        <Box className="scroll w-[100%] rounded-md border-[1px] border-solid border-mantineGray-8">
           <form onSubmit={form.onSubmit(handleSubmit)} ref={formRef}>
             <Textarea
               classNames={{
