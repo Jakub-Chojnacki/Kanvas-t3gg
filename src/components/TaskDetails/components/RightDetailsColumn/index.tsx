@@ -1,11 +1,9 @@
 import {
-  Avatar,
   Box,
   Button,
   Divider,
   Flex,
   Modal,
-  Popover,
   Select,
   Text,
 } from "@mantine/core";
@@ -66,17 +64,12 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
     };
   });
 
-  const mappedMembers = membersData?.map((member) => {
-    return {
-      label: <UserAvatarWithName user={member} />,
-      value: member.id,
-    };
-  });
+
   const handleChangeStatus = (value: string) => {
     updateTask({ taskId: taskData.id, columnId: value });
   };
 
-  const handleToggleUserAssignment = async (userId: string) => {
+  const handleToggleUserAssignment = async (userId: string):Promise<void> => {
     const userIsAssigned = assignedMembers?.find((user) => user.id === userId);
 
     try {
