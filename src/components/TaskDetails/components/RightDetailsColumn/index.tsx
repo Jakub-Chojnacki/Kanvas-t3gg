@@ -1,19 +1,11 @@
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Modal,
-  Select,
-  Text,
-} from "@mantine/core";
-import dayjs from "dayjs";
+import { Box, Button, Divider, Flex, Modal, Select, Text } from "@mantine/core";
 import React from "react";
 import SettingSelect from "../SettingSelect";
 import { RouterOutputs, api } from "~/utils/api";
 import { useDisclosure } from "@mantine/hooks";
 import UserAvatarWithName from "~/components/UserAvatarWithName";
 import toast from "react-hot-toast";
+import formatDateToFE from "~/utils/formatDateToFE";
 
 interface IRightDetailsColumn {
   taskData: RouterOutputs["tasks"]["getById"];
@@ -64,12 +56,11 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
     };
   });
 
-
   const handleChangeStatus = (value: string) => {
     updateTask({ taskId: taskData.id, columnId: value });
   };
 
-  const handleToggleUserAssignment = async (userId: string):Promise<void> => {
+  const handleToggleUserAssignment = async (userId: string): Promise<void> => {
     const userIsAssigned = assignedMembers?.find((user) => user.id === userId);
 
     try {
@@ -93,7 +84,7 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
   };
 
   return (
-    <Flex direction={"column"} gap="1em" className="p-4">
+    <Flex direction={"column"} gap="1em" className="min-w-max p-4">
       <SettingSelect text={"Status"}>
         <Select
           data={mappedColumns || []}
@@ -114,7 +105,7 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
         <UserAvatarWithName user={createdByUser} />
       </SettingSelect>
       <SettingSelect text={"Created at"}>
-        <Text>{dayjs(createdAt).format("DD.MM.YYYY")}</Text>
+        <Text>{formatDateToFE(createdAt)}</Text>
       </SettingSelect>
 
       <Divider />
