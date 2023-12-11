@@ -165,9 +165,11 @@ export const tasksRouter = createTRPCRouter({
       z.object({
         taskId: z.string(),
         columnId: z.string().optional(),
+        title: z.string().optional(),
+        content:z.string().optional()
       })
     )
-    .mutation(async ({ ctx, input: { taskId, columnId } }) => {
+    .mutation(async ({ ctx, input: { taskId, columnId,title,content } }) => {
       try {
         const updatedTask = await ctx.prisma.task.update({
           where: {
@@ -175,6 +177,8 @@ export const tasksRouter = createTRPCRouter({
           },
           data: {
             columnId,
+            title,
+            content
           },
         });
 
