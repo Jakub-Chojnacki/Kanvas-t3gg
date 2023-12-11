@@ -18,7 +18,6 @@ const AddComment: React.FC<IAddComment> = ({ taskId }) => {
   });
 
   const handleSaveComment = (comment: string): void => {
-    console.log(comment);
     addComment({ content: comment, taskId });
   };
   return (
