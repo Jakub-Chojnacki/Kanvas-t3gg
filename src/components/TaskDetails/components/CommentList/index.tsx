@@ -22,7 +22,7 @@ const CommentList: React.FC<ICommentList> = ({ taskId }) => {
       <AddComment taskId={taskId} />
       <Flex direction="column" className="my-4">
         {comments?.map((comment) => {
-          return <SingleComment comment={comment} />;
+          return <SingleComment comment={comment} taskId={taskId}/>;
         })}
       </Flex>
     </Flex>

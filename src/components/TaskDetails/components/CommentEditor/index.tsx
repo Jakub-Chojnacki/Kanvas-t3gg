@@ -13,7 +13,7 @@ export interface ICommentEditor {
   content: string;
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
-  handleSaveEdit: () => void;
+  handleSaveEdit: (content: string) => void;
 }
 const CommentEditor: React.FC<ICommentEditor> = ({
   content,
@@ -48,6 +48,11 @@ const CommentEditor: React.FC<ICommentEditor> = ({
     setEditorContent(prevContent);
     editor?.commands.setContent(prevContent);
   };
+
+  const handleClickSave = (): void => {
+    handleSaveEdit(editorContent);
+  };
+
   return (
     <Flex direction="column">
       <RichTextEditor
@@ -94,7 +99,7 @@ const CommentEditor: React.FC<ICommentEditor> = ({
 
       {isEditing && (
         <Flex className="my-4" gap={8}>
-          <BasicButton onClick={handleSaveEdit}>Save</BasicButton>
+          <BasicButton onClick={handleClickSave}>Save</BasicButton>
           <BasicButton isOutline onClick={handleClickClose}>
             Cancel
           </BasicButton>
