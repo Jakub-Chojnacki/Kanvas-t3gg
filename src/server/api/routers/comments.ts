@@ -71,4 +71,27 @@ export const commentsRouter = createTRPCRouter({
         console.error("Error deleting a comment:", error);
       }
     }),
+  update: privateProcedure
+    .input(
+      z.object({
+        commentId: z.string(),
+        content: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { commentId, content } }) => {
+      try {
+        const updatedTask = await ctx.prisma.comment.update({
+          where: {
+            id: commentId,
+          },
+          data: {
+            content,
+          },
+        });
+
+        return updatedTask;
+      } catch (error) {
+        console.error("Error updating task:", error);
+      }
+    }),
 });

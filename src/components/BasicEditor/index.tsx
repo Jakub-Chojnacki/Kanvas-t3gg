@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Flex } from "@mantine/core";
 import { RichTextEditor } from "@mantine/tiptap";
 import { Editor, useEditor } from "@tiptap/react";
@@ -14,6 +14,7 @@ export interface IBasicEditor {
   handleSave: (newContent: string) => void;
   placeholder?: string;
   editorProps?: Editor;
+  resetContentAfterSubmit?: boolean;
 }
 
 const BasicEditor: React.FC<IBasicEditor> = ({
@@ -21,6 +22,7 @@ const BasicEditor: React.FC<IBasicEditor> = ({
   handleSave,
   placeholder = "",
   editorProps,
+  resetContentAfterSubmit = false,
 }) => {
   const [isEditable, setIsEditable] = useState(false);
   const [editorContent, setEditorContent] = useDebouncedState(content, 500);
@@ -30,34 +32,43 @@ const BasicEditor: React.FC<IBasicEditor> = ({
       StarterKit,
       Placeholder.configure({
         placeholder,
+        showOnlyWhenEditable: false,
       }),
     ],
     content: editorContent,
     onUpdate({ editor }) {
       setEditorContent(editor.getHTML());
     },
+    editable:isEditable
   });
 
   const handleOpenEdit = (): void => {
     setIsEditable(true);
     setPrevContent(editorContent);
   };
+
   const handleClickSave = (): void => {
     handleSave(editorContent);
     setIsEditable(false);
+    resetContentAfterSubmit && setEditorContent("");
   };
+
   const handleCloseEdit = (): void => {
     setIsEditable(false);
     setEditorContent(prevContent);
     editor?.commands.setContent(prevContent);
   };
 
+  useEffect(() => {
+    editor?.setEditable(isEditable);
+  }, [isEditable]);
+
   return (
     <React.Fragment>
       <RichTextEditor
         editor={editor}
         classNames={{
-          root: "w-[100%]",
+          root: "w-[100%] cursor-pointer",
           content: !isEditable ? "hover:bg-mantineGray-8" : "",
         }}
         onClick={handleOpenEdit}

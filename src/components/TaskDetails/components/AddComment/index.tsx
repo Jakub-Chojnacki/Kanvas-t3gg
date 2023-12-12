@@ -10,22 +10,41 @@ export interface IAddComment {
 
 const AddComment: React.FC<IAddComment> = ({ taskId }) => {
   const ctx = api.useContext();
-  const { mutate: addComment } = api.comments.create.useMutation({
+  const mutation = api.comments.create.useMutation({
     onSuccess: async () => {
       await ctx.comments.getCommentsByTask.invalidate({ taskId });
-      toast.success("A comment has been added.");
     },
   });
 
   const handleSaveComment = (comment: string): void => {
-    addComment({ content: comment, taskId });
+    const promise = new Promise((resolve, reject) => {
+      mutation.mutate(
+        { content: comment, taskId }, 
+        {
+          onSuccess: (data) => {
+            resolve(data);
+          },
+          onError: (error) => {
+            reject(error);
+          },
+        }
+      );
+    });
+
+    toast.promise(promise, {
+      loading: "Adding a comment...",
+      success: "Your comment was added!",
+      error: "Failed while trying to add a comment!",
+    });
   };
+
   return (
     <div>
       <BasicEditor
         content=""
         handleSave={handleSaveComment}
         placeholder="Add a comment"
+        resetContentAfterSubmit
       />
     </div>
   );
