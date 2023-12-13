@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Flex, Modal, Select, Text } from "@mantine/core";
-import React from "react";
+import React, { useMemo } from "react";
 import SettingSelect from "../SettingSelect";
 import { RouterOutputs, api } from "~/utils/api";
 import { useDisclosure } from "@mantine/hooks";
@@ -13,7 +13,6 @@ interface IRightDetailsColumn {
 
 const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
   const ctx = api.useContext();
-  const [opened, { close, open }] = useDisclosure(false);
   const [modalOpened, { close: closeModal, open: openModal }] =
     useDisclosure(false);
 
@@ -27,6 +26,11 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
   const { data: membersData } = api.boards.getBoardMembers.useQuery({
     id: boardId,
   });
+
+  const assignedMembersIds = useMemo(
+    () => assignedMembers.map((member) => member.id),
+    [assignedMembers]
+  );
 
   const { mutate: assignPerson } = api.tasks.assignPersonToTask.useMutation({
     onSuccess: () => {
@@ -65,18 +69,15 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
 
     try {
       if (!userIsAssigned) {
-        const assignedPerson = await assignPerson({
+        assignPerson({
           taskId: taskData.id,
           userId,
         });
-        return assignedPerson;
       } else {
-        const deletedAssignedPerson = await deleteAssignedPerson({
+        deleteAssignedPerson({
           taskId: taskData.id,
           userId,
         });
-
-        return deletedAssignedPerson;
       }
     } catch (e) {
       toast.error("Couldn't change the assigned person");
@@ -111,21 +112,44 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
       <Divider />
       <Text weight="bold">Assigned</Text>
       <Box className="flex flex-col gap-4">
-        <Box onClick={open}>
+        <Flex direction="column" gap={8}>
           {assignedMembers?.length ? (
             assignedMembers.map((user) => <UserAvatarWithName user={user} />)
           ) : (
             <></>
           )}
-        </Box>
+        </Flex>
         <Button variant="outline" color="gray" onClick={openModal}>
           + Add assignees
         </Button>
-        <Modal opened={modalOpened} onClose={closeModal} centered>
+        <Modal
+          opened={modalOpened}
+          onClose={closeModal}
+          centered
+          title={
+            <Text size="xl" weight="bold" align="center">
+              Select assigned user
+            </Text>
+          }
+        >
           <Box className="flex flex-col gap-4">
-            {membersData?.map((user) => (
-              <UserAvatarWithName user={user} pointer />
-            ))}
+            {membersData?.map((user) => {
+              const isUserAssigned = assignedMembersIds.includes(user.id);
+              const commonClassNames =
+                "p-2 border-solid border-[1px] border-l-0 border-r-0 border-mantineDark-4";
+              return (
+                <Box
+                  className={
+                    isUserAssigned
+                      ? `${commonClassNames} bg-mantineDark-4`
+                      : `${commonClassNames}`
+                  }
+                  onClick={async () => handleToggleUserAssignment(user.id)}
+                >
+                  <UserAvatarWithName user={user} pointer />
+                </Box>
+              );
+            })}
           </Box>
         </Modal>
       </Box>
