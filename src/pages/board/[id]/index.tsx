@@ -2,6 +2,7 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 
 import BasicLayout from "~/components/BasicLayout";
+import BoardSidenav from "~/components/BoardSidenav";
 import KanbanBoard from "~/components/KanbanBoard";
 
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
@@ -14,10 +15,7 @@ const BoardPage: NextPage<{ id: string }> = ({ id }) => {
   if (isLoading) return <div>Loading...</div>;
   if (!data) return <div>404</div>;
 
-  const boardSidenav = 
-  <div>
-    
-  </div>
+  const boardSidenav = <BoardSidenav boardId={id} name={data.name} />;
 
   return (
     <>

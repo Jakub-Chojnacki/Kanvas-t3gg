@@ -13,10 +13,11 @@ model Board {
   createdAt DateTime @default(now())
   name      String
 
-  columns Column[]
-  members BoardMember[]
-  tasks   Task[]
-  tags    Tag[]
+  columns         Column[]
+  members         BoardMember[]
+  tasks           Task[]
+  tags            Tag[]
+  invitationLinks BoardInvitation[]
 }
 
 model BoardMember {
@@ -24,6 +25,17 @@ model BoardMember {
   userId  String
   Board   Board  @relation(fields: [boardId], references: [id])
   boardId String
+
+  @@index([boardId])
+}
+
+model BoardInvitation {
+  id        String   @id @default(cuid())
+  expired   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  createdBy String
+  Board     Board    @relation(fields: [boardId], references: [id])
+  boardId   String
 
   @@index([boardId])
 }
@@ -46,13 +58,13 @@ model Column {
 model Task {
   id         String           @id @default(cuid())
   createdAt  DateTime         @default(now())
-  dueDate DateTime? 
+  dueDate    DateTime?
   title      String
   content    String
   authorId   String
   assignedTo AssignedToTask[]
   order      Int
-  isArchived Boolean @default(false)
+  isArchived Boolean          @default(false)
 
   Column   Column @relation(fields: [columnId], references: [id])
   columnId String
