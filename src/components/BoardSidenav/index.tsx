@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { Flex, Text } from "@mantine/core";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-react";
 
 import SidenavItem from "./SidenavItem";
+import CreateInvitationModal from "../CreateInvitationModal";
 
 export interface IBoardSidenav {
   boardId: string;
@@ -19,8 +20,16 @@ const BoardSidenav: React.FC<IBoardSidenav> = ({ boardId, name }) => {
   const handleNavigateToBoard = (): void => {
     push(`/board/${boardId}`);
   };
+  const [showInvitatonModal,setShowInvitationModal] = useState(false)
+
+  const openInvitationModal = ():void => {
+    setShowInvitationModal(true)
+  }
+  const closeInvitationModal = ():void => setShowInvitationModal(false)
+
   return (
     <Flex direction="column" h="100%">
+     <CreateInvitationModal  opened={showInvitatonModal} handleClose={closeInvitationModal}/>
       <Text size="2xl" weight="bold">
         {name}
       </Text>
@@ -34,7 +43,7 @@ const BoardSidenav: React.FC<IBoardSidenav> = ({ boardId, name }) => {
       </Flex>
       <Flex direction="column" justify="center" gap={8} mt="auto">
         <SidenavItem icon={<IconUsers />} text="team" />
-        <SidenavItem icon={<IconUserPlus />} text="invite" />
+        <SidenavItem icon={<IconUserPlus />} text="invite" handleClick={openInvitationModal}/>
       </Flex>
     </Flex>
   );
