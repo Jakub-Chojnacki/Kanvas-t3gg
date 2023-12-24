@@ -55,11 +55,14 @@ export const boardsRouter = createTRPCRouter({
       return newBoard;
     }),
   getBoardMembers: privateProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .input(
+      z.object({ id: z.string(), showCurrentUserFirst: z.boolean().optional() })
+    )
+    .query(async ({ ctx, input: { id, showCurrentUserFirst } }) => {
+      const userId = ctx.userId;
       const members = await ctx.prisma.boardMember.findMany({
         where: {
-          boardId: input.id,
+          boardId: id,
         },
       });
 
@@ -67,9 +70,33 @@ export const boardsRouter = createTRPCRouter({
         userId: members.map((member) => member.userId),
         limit: 100,
       });
-  
+
       const filteredUsers = users.map(filterUserData);
 
+      if (showCurrentUserFirst) {
+        return filteredUsers.sort((firstUser, secondUser) => {
+          if (firstUser.id === userId) return -1;
+          if (secondUser.id === userId) return 1;
+          return 0;
+        });
+      }
+
       return filteredUsers;
+    }),
+  leaveBoard: privateProcedure
+    .input(z.object({ boardId: z.string() }))
+    .mutation(async ({ ctx, input: { boardId } }) => {
+      const userId = ctx.userId;
+      const userAsBoardMember = await ctx.prisma.boardMember.findFirst({
+        where: { userId },
+      });
+      const deletedUser = await ctx.prisma.boardMember.delete({
+        where: {
+          id: userAsBoardMember?.id,
+          boardId,
+        },
+      });
+
+      return deletedUser;
     }),
 });

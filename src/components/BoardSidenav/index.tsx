@@ -27,6 +27,8 @@ const BoardSidenav: React.FC<IBoardSidenav> = ({ boardId, name }) => {
   }
   const closeInvitationModal = ():void => setShowInvitationModal(false)
 
+  const handleNavigateToTeams = ():void => {push(`/board/${boardId}/team`)}
+
   return (
     <Flex direction="column" h="100%">
      <CreateInvitationModal  opened={showInvitatonModal} handleClose={closeInvitationModal}/>
@@ -42,7 +44,7 @@ const BoardSidenav: React.FC<IBoardSidenav> = ({ boardId, name }) => {
         <SidenavItem icon={<IconNotebook />} text="notes" />
       </Flex>
       <Flex direction="column" justify="center" gap={8} mt="auto">
-        <SidenavItem icon={<IconUsers />} text="team" />
+        <SidenavItem icon={<IconUsers />} text="team" handleClick={handleNavigateToTeams} />
         <SidenavItem icon={<IconUserPlus />} text="invite" handleClick={openInvitationModal}/>
       </Flex>
     </Flex>
