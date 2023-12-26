@@ -12,6 +12,7 @@ model Board {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   name      String
+  imageUrl String?
 
   columns         Column[]
   members         BoardMember[]
@@ -81,7 +82,7 @@ model Task {
 
 model AssignedToTask {
   id         String   @id @default(cuid())
-  userId     String   @unique
+  userId     String   
   Task       Task     @relation(fields: [taskId], references: [id])
   taskId     String
   assignedAt DateTime @default(now())

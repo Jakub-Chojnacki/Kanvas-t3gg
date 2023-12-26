@@ -1,3 +1,4 @@
+'use client';
 import React, { Fragment } from "react";
 import toast from "react-hot-toast";
 import { Draggable, Droppable } from "@hello-pangea/dnd";

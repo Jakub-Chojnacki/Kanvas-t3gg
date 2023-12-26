@@ -64,9 +64,9 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
     updateTask({ taskId: taskData.id, columnId: value });
   };
 
-  const handleToggleUserAssignment = async (userId: string): Promise<void> => {
+  const handleToggleUserAssignment = (userId: string): void => {
     const userIsAssigned = assignedMembers?.find((user) => user.id === userId);
-
+    
     try {
       if (!userIsAssigned) {
         assignPerson({
@@ -114,7 +114,9 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
       <Box className="flex flex-col gap-4">
         <Flex direction="column" gap={8}>
           {assignedMembers?.length ? (
-            assignedMembers.map((user) => <UserAvatarWithName user={user} />)
+            assignedMembers.map((user) => (
+              <UserAvatarWithName key={`assigned-${user?.id}`} user={user} />
+            ))
           ) : (
             <></>
           )}
@@ -139,12 +141,13 @@ const RightDetailsColumn: React.FC<IRightDetailsColumn> = ({ taskData }) => {
                 "p-2 border-solid border-[1px] border-l-0 border-r-0 border-mantineDark-4";
               return (
                 <Box
+                  key={user?.id}
                   className={
                     isUserAssigned
                       ? `${commonClassNames} bg-mantineDark-4`
                       : `${commonClassNames}`
                   }
-                  onClick={async () => handleToggleUserAssignment(user.id)}
+                  onClick={() => handleToggleUserAssignment(user.id)}
                 >
                   <UserAvatarWithName user={user} pointer />
                 </Box>
