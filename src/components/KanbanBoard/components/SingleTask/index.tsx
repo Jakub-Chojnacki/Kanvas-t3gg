@@ -1,3 +1,4 @@
+'use client';
 import { Avatar, Box, Flex, Text, useMantineTheme } from "@mantine/core";
 import { Draggable } from "@hello-pangea/dnd";
 import { useRouter } from "next/router";

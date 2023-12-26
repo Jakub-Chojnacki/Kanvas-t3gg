@@ -1,3 +1,4 @@
+'use client';
 import { Box, Button, Text, Textarea, useMantineTheme } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { IconCheck, IconPlus, IconX } from "@tabler/icons-react";

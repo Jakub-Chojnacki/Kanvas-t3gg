@@ -20,18 +20,23 @@ const BoardSidenav: React.FC<IBoardSidenav> = ({ boardId, name }) => {
   const handleNavigateToBoard = (): void => {
     push(`/board/${boardId}`);
   };
-  const [showInvitatonModal,setShowInvitationModal] = useState(false)
+  const [showInvitatonModal, setShowInvitationModal] = useState(false);
 
-  const openInvitationModal = ():void => {
-    setShowInvitationModal(true)
-  }
-  const closeInvitationModal = ():void => setShowInvitationModal(false)
+  const openInvitationModal = (): void => {
+    setShowInvitationModal(true);
+  };
+  const closeInvitationModal = (): void => setShowInvitationModal(false);
 
-  const handleNavigateToTeams = ():void => {push(`/board/${boardId}/team`)}
+  const handleNavigateToTeams = (): void => {
+    push(`/board/${boardId}/team`);
+  };
 
   return (
     <Flex direction="column" h="100%">
-     <CreateInvitationModal  opened={showInvitatonModal} handleClose={closeInvitationModal}/>
+      <CreateInvitationModal
+        opened={showInvitatonModal}
+        handleClose={closeInvitationModal}
+      />
       <Text size="2xl" weight="bold">
         {name}
       </Text>
@@ -44,8 +49,16 @@ const BoardSidenav: React.FC<IBoardSidenav> = ({ boardId, name }) => {
         <SidenavItem icon={<IconNotebook />} text="notes" />
       </Flex>
       <Flex direction="column" justify="center" gap={8} mt="auto">
-        <SidenavItem icon={<IconUsers />} text="team" handleClick={handleNavigateToTeams} />
-        <SidenavItem icon={<IconUserPlus />} text="invite" handleClick={openInvitationModal}/>
+        <SidenavItem
+          icon={<IconUsers />}
+          text="team"
+          handleClick={handleNavigateToTeams}
+        />
+        <SidenavItem
+          icon={<IconUserPlus />}
+          text="invite"
+          handleClick={openInvitationModal}
+        />
       </Flex>
     </Flex>
   );

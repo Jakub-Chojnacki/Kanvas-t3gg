@@ -15,6 +15,7 @@ import {
   ColorSchemeProvider,
 } from "@mantine/core";
 import { dark } from "@clerk/themes";
+import { EdgeStoreProvider } from "../lib/edgestore";
 
 import BasicLayout from "~/components/BasicLayout";
 
@@ -53,7 +54,7 @@ const MyApp = ({ Component, pageProps }: AppProps & MantineProps) => {
         theme={{ colorScheme }}
         withGlobalStyles
         withNormalizeCSS
-        withCSSVariables 
+        withCSSVariables
       >
         <ClerkProvider
           {...pageProps}
@@ -61,25 +62,27 @@ const MyApp = ({ Component, pageProps }: AppProps & MantineProps) => {
             baseTheme: colorScheme == "dark" ? dark : null,
           }}
         >
-          <Toaster />
-          <SignedIn>
-            {publicPages.includes(pathname) ? (
-              <BasicLayout>
+          <EdgeStoreProvider>
+            <Toaster />
+            <SignedIn>
+              {publicPages.includes(pathname) ? (
+                <BasicLayout>
+                  <Component {...pageProps} />
+                </BasicLayout>
+              ) : (
                 <Component {...pageProps} />
-              </BasicLayout>
-            ) : (
-              <Component {...pageProps} />
-            )}
-          </SignedIn>
-          <SignedOut>
-            {publicPages.includes(pathname) ? (
-              <BasicLayout>
-                <Component {...pageProps} />
-              </BasicLayout>
-            ) : (
-              <RedirectToSignUp />
-            )}
-          </SignedOut>
+              )}
+            </SignedIn>
+            <SignedOut>
+              {publicPages.includes(pathname) ? (
+                <BasicLayout>
+                  <Component {...pageProps} />
+                </BasicLayout>
+              ) : (
+                <RedirectToSignUp />
+              )}
+            </SignedOut>
+          </EdgeStoreProvider>
         </ClerkProvider>
       </MantineProvider>
     </ColorSchemeProvider>

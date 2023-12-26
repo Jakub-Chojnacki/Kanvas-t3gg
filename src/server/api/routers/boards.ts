@@ -24,11 +24,11 @@ export const boardsRouter = createTRPCRouter({
   getById: privateProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const boards = await ctx.prisma.board.findUnique({
+      const board = await ctx.prisma.board.findUnique({
         where: { id: input.id },
       });
 
-      return boards;
+      return board;
     }),
   create: privateProcedure
     .input(
@@ -48,6 +48,30 @@ export const boardsRouter = createTRPCRouter({
       await ctx.prisma.boardMember.create({
         data: {
           userId: authorId,
+          boardId: newBoard.id,
+        },
+      });
+
+      await ctx.prisma.column.create({
+        data: {
+          name: "To do",
+          order: 0,
+          boardId: newBoard.id,
+        },
+      });
+
+      await ctx.prisma.column.create({
+        data: {
+          name: "In progress",
+          order: 1,
+          boardId: newBoard.id,
+        },
+      });
+
+      await ctx.prisma.column.create({
+        data: {
+          name: "Done",
+          order: 2,
           boardId: newBoard.id,
         },
       });

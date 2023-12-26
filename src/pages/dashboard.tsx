@@ -1,8 +1,15 @@
 import Head from "next/head";
 
 import BasicLayout from "~/components/BasicLayout";
+import DashboardDisplay from "~/components/DashboardDisplay";
+import { api } from "~/utils/api";
 
 const Dashboard = () => {
+  const { data, isLoading } = api.boards.getAll.useQuery();
+
+  if (isLoading) return <div>Loading...</div>;
+  if (!data) return <div>404</div>;
+
   return (
     <>
       <Head>
@@ -12,7 +19,7 @@ const Dashboard = () => {
       </Head>
 
       <BasicLayout>
-        <div>Dashboard</div>
+        <DashboardDisplay data={data}/>
       </BasicLayout>
     </>
   );

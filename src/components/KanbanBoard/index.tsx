@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect } from "react";
 import {
   DragDropContext,
@@ -14,7 +15,7 @@ import { compareOrder } from "./utils";
 import TaskColumn from "./components/TaskColumn";
 
 import { DROPPABLE_TYPE } from "./const";
-import { Box, useMantineTheme } from "@mantine/core";
+import { Box } from "@mantine/core";
 
 type BoardData = NonNullable<RouterOutputs["boards"]["getById"]>;
 

@@ -12,6 +12,7 @@ const BoardPage: NextPage<{ id: string }> = ({ id }) => {
   const { data, isLoading } = api.boards.getById.useQuery({
     id,
   });
+
   if (isLoading) return <div>Loading...</div>;
   if (!data) return <div>404</div>;
 
